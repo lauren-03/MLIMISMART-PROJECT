@@ -1,0 +1,376 @@
+// Interface strings for MlimiSmart, in English (EN) and Chichewa (NY).
+
+export const STRINGS = {
+  // ---- navigation and shell ----
+  appName:        { EN: 'MlimiSmart',            NY: 'MlimiSmart' },
+  tagline:        { EN: 'Tea farming advice for Malawi', NY: 'Uphungu wa ulimi wa tiyi ku Malawi' },
+  navHome:        { EN: 'Home',                  NY: 'Kunyumba' },
+  navDashboard:   { EN: 'Dashboard',             NY: 'Chiwonetsero' },
+  navWeather:     { EN: 'Weather',               NY: 'Nyengo' },
+  navAsk:         { EN: 'Ask for advice',        NY: 'Funsani uphungu' },
+  navHistory:     { EN: 'My advice',             NY: 'Uphungu wanga' },
+  navProfile:     { EN: 'My profile',            NY: 'Mbiri yanga' },
+  navAdmin:       { EN: 'Admin',                 NY: 'Woyanganira' },
+  navSms:         { EN: 'SMS demo',              NY: 'Chitsanzo cha SMS' },
+  login:          { EN: 'Log in',                NY: 'Lowani' },
+  logout:         { EN: 'Log out',               NY: 'Tulukani' },
+  register:       { EN: 'Register',              NY: 'Lembetsani' },
+
+  // ---- home page ----
+  heroTitle:      { EN: 'Timely tea farming advice, in your language',
+                    NY: 'Uphungu wa ulimi wa tiyi pa nthawi yake, mu chilankhulo chanu' },
+  heroText:       { EN: 'MlimiSmart combines live weather data with tea farming knowledge to tell you what to do on your farm today. Use the website, or send an SMS from a basic phone.',
+                    NY: 'MlimiSmart amaphatikiza nkhani ya nyengo ndi nzeru za ulimi wa tiyi kuti akuuzeni zoyenera kuchita mu munda wanu lero. Gwiritsani ntchito webusaiti, kapena tumizani SMS kuchokera pa foni yosavuta.' },
+  getStarted:     { EN: 'Get started',           NY: 'Yambani' },
+  haveAccount:    { EN: 'I already have an account', NY: 'Ndili kale ndi akaunti' },
+  featuresTitle:  { EN: 'What MlimiSmart does',  NY: 'Zomwe MlimiSmart amachita' },
+  featureWeather: { EN: 'Weather you can act on', NY: 'Nyengo yothandiza' },
+  featureWeatherText: { EN: 'Current conditions and a five day forecast for Thyolo and Mulanje, including the chance of rain that decides whether you fertilize today.',
+                    NY: 'Nyengo ya pompano ndi masiku asanu akubwera ku Thyolo ndi Mulanje, kuphatikiza mwayi wa mvula womwe umasankha ngati mungathire fetereza lero.' },
+  featureAdvice:  { EN: 'Advice for your own farm', NY: 'Uphungu wa munda wanu' },
+  featureAdviceText: { EN: 'Ask a question in English or Chichewa and get an answer based on your location, the season and the weather today.',
+                    NY: 'Funsani funso mu Chingerezi kapena Chichewa ndipo mupeza yankho malinga ndi dera lanu, nyengo ndi nyengo ya lero.' },
+  featureSms:     { EN: 'Works on a basic phone', NY: 'Imagwira pa foni yosavuta' },
+  featureSmsText: { EN: 'No smartphone and no internet needed. Send one word by SMS and the same advisory engine answers you.',
+                    NY: 'Simufuna foni yamakono kapena intaneti. Tumizani mawu amodzi pa SMS ndipo makina omwewo akuyankhani.' },
+  featureBilingual: { EN: 'English and Chichewa', NY: 'Chingerezi ndi Chichewa' },
+  featureBilingualText: { EN: 'Every screen and every piece of advice is available in both languages. Switch at any time.',
+                    NY: 'Chiwonetsero chilichonse ndi uphungu wonse alipo mu zilankhulo zonse ziwiri. Sinthani nthawi iliyonse.' },
+  topicsTitle:    { EN: 'Topics you can ask about', NY: 'Zomwe mungafunse' },
+
+  // ---- authentication ----
+  loginTitle:     { EN: 'Log in to MlimiSmart',  NY: 'Lowani mu MlimiSmart' },
+  registerTitle:  { EN: 'Create your MlimiSmart account', NY: 'Pangani akaunti yanu ya MlimiSmart' },
+  fullName:       { EN: 'Full name',             NY: 'Dzina lonse' },
+  phone:          { EN: 'Phone number',          NY: 'Nambala ya foni' },
+  password:       { EN: 'Password',              NY: 'Achinsinsi' },
+  location:       { EN: 'Area',                  NY: 'Dera' },
+  preferredLanguage: { EN: 'Preferred language', NY: 'Chilankhulo chomwe mumakonda' },
+  farmSize:       { EN: 'Farm size (hectares)',  NY: 'Kukula kwa munda (mahekitala)' },
+  yearsFarming:   { EN: 'Years in tea farming',  NY: 'Zaka mu ulimi wa tiyi' },
+  optional:       { EN: 'optional',              NY: 'mwaufulu' },
+  noAccount:      { EN: 'No account yet? Register', NY: 'Mulibe akaunti? Lembetsani' },
+  haveAccountQ:   { EN: 'Already registered? Log in', NY: 'Mwalembetsa kale? Lowani' },
+
+  // ---- dashboard ----
+  goodMorning:    { EN: 'Good morning',          NY: 'Mwadzuka bwanji' },
+  goodAfternoon:  { EN: 'Good afternoon',        NY: 'Masana abwino' },
+  goodEvening:    { EN: 'Good evening',          NY: 'Madzulo abwino' },
+  todaysAdvice:   { EN: 'Tea advice for today',  NY: 'Uphungu wa tiyi wa lero' },
+  askAnything:    { EN: 'Ask MlimiSmart about your tea', NY: 'Funsani MlimiSmart za tiyi wanu' },
+  quickQuestions: { EN: 'Common questions',      NY: 'Mafunso omwe amafunsidwa kwambiri' },
+  viewForecast:   { EN: 'View full forecast',    NY: 'Onani nyengo yonse' },
+  season:         { EN: 'Season',                NY: 'Nyengo' },
+
+  // ---- weather ----
+  weatherTitle:   { EN: 'Weather for your area', NY: 'Nyengo ya dera lanu' },
+  temperature:    { EN: 'Temperature',           NY: 'Kutentha' },
+  rainChance:     { EN: 'Chance of rain',        NY: 'Mwayi wa mvula' },
+  humidity:       { EN: 'Humidity',              NY: 'Chinyezi' },
+  wind:           { EN: 'Wind',                  NY: 'Mphepo' },
+  rainfall:       { EN: 'Rainfall',              NY: 'Mvula' },
+  forecast5:      { EN: 'Next five days',        NY: 'Masiku asanu akubwera' },
+  weatherOffline: { EN: 'Live weather could not be loaded. Advice is still available, based on good practice for the season.',
+                    NY: 'Nyengo ya pompano sinatheke kupezeka. Uphungu ulipobe, malinga ndi njira zabwino za nyengo ino.' },
+  changeArea:     { EN: 'Change area',           NY: 'Sinthani dera' },
+
+  // ---- advisory ----
+  askTitle:       { EN: 'Ask for farming advice', NY: 'Funsani uphungu wa ulimi' },
+  askLead:        { EN: 'What would you like to know about your tea farm today?', NY: 'Kodi mukufuna kudziwa chiyani za munda wanu wa tiyi lero?' },
+  askHelpsTitle:  { EN: 'How MlimiSmart helps', NY: 'Momwe MlimiSmart amathandizira' },
+  askHelpsText:   { EN: 'Your question is looked at together with the weather in your area and tea farming guidance, and you get short, practical advice.',
+                    NY: 'Funso lanu limaonedwa pamodzi ndi nyengo ya dera lanu ndi malangizo a ulimi wa tiyi, ndipo mumalandira uphungu waufupi wothandiza.' },
+  askCanAdvise:   { EN: 'MlimiSmart advises on fertilizer, plucking, pruning, planting, harvesting, shade and the weather.',
+                    NY: 'MlimiSmart amalangiza za fetereza, kusenda, kutema, kubzala, kukolola, mithunzi ndi nyengo.' },
+  questionLabel:  { EN: 'Your question',         NY: 'Funso lanu' },
+  questionHint:   { EN: 'For example: Should I apply fertilizer today?', NY: 'Mwachitsanzo: Kodi ndingathire fetereza lero?' },
+  askButton:      { EN: 'Get advice',            NY: 'Pezani uphungu' },
+  asking:         { EN: 'Thinking...',           NY: 'Ndikuganiza...' },
+  adviceFor:      { EN: 'Advice for',            NY: 'Uphungu wa' },
+  topic:          { EN: 'Topic',                 NY: 'Mutu' },
+  whyThisAdvice:  { EN: 'Why this advice',       NY: 'Chifukwa chake uphungu uwu' },
+  urgent:         { EN: 'Act now',               NY: 'Chitani tsopano' },
+  caution:        { EN: 'Take care',             NY: 'Samalani' },
+  normal:         { EN: 'Normal',                NY: 'Zachizolowezi' },
+
+  // ---- history ----
+  historyTitle:   { EN: 'My advice history',     NY: 'Mbiri ya uphungu wanga' },
+  noHistory:      { EN: 'You have not asked any questions yet.', NY: 'Simunafunse funso lililonse.' },
+  channel:        { EN: 'Channel',               NY: 'Njira' },
+  askedOn:        { EN: 'Asked',                 NY: 'Funsidwa' },
+
+  // ---- profile ----
+  profileTitle:   { EN: 'My profile',            NY: 'Mbiri yanga' },
+  saveChanges:    { EN: 'Save changes',          NY: 'Sungani zosintha' },
+  saved:          { EN: 'Your profile has been updated.', NY: 'Mbiri yanu yasinthidwa.' },
+
+  // ---- SMS simulator ----
+  smsTitle:       { EN: 'SMS advisory demonstration', NY: 'Chitsanzo cha uphungu wa SMS' },
+  smsIntro:       { EN: 'This screen shows how a farmer with a basic phone uses MlimiSmart. Type a message as if you were sending an SMS, and the system answers through the same advisory engine the website uses.',
+                    NY: 'Chiwonetsero ichi chikuonetsa momwe mlimi wa foni yosavuta amagwiritsa ntchito MlimiSmart. Lembani uthenga ngati mukutumiza SMS, ndipo makina omwewo akuyankhani.' },
+  smsFrom:        { EN: 'Farmer phone number',   NY: 'Nambala ya foni ya mlimi' },
+  smsMessage:     { EN: 'SMS message',           NY: 'Uthenga wa SMS' },
+  smsSend:        { EN: 'Send SMS',              NY: 'Tumizani SMS' },
+  smsTryThese:    { EN: 'Try these messages',    NY: 'Yesani mauthenga awa' },
+  smsMode:        { EN: 'Gateway mode',          NY: 'Mtundu wa gateway' },
+  smsChars:       { EN: 'characters',            NY: 'zilembo' },
+
+  // ---- USSD simulator ----
+  navUssd:        { EN: 'USSD demo',            NY: 'Chitsanzo cha USSD' },
+  ussdTitle:      { EN: 'USSD advisory demonstration', NY: 'Chitsanzo cha uphungu wa USSD' },
+  ussdIntro:      { EN: 'USSD works on any phone, with no internet and no airtime for data. A farmer dials a short code and navigates a menu. This screen drives the real USSD engine, so every screen below is exactly what the telecom gateway would send to the handset.',
+                    NY: 'USSD imagwira pa foni iliyonse, popanda intaneti kapena ndalama za data. Mlimi amayimba nambala yaifupi ndipo amasankha pa menyu. Chiwonetsero ichi chikugwiritsa ntchito makina enieni a USSD, choncho zonse zomwe zikuonekera pansipa ndi zomwe gateway imatumiza ku foni.' },
+  ussdDial:       { EN: 'Dial',                 NY: 'Imbani' },
+  ussdHangUp:     { EN: 'Hang up',              NY: 'Tsekani' },
+  ussdRestart:    { EN: 'Dial again',           NY: 'Imbaninso' },
+  ussdReply:      { EN: 'Your reply',           NY: 'Yankho lanu' },
+  ussdSend:       { EN: 'Send',                 NY: 'Tumizani' },
+  ussdSessionEnd: { EN: 'Session ended',        NY: 'Nthawi yatha' },
+  ussdNotDialled: { EN: 'Dial the short code to begin.', NY: 'Imbani nambala yaifupi kuti muyambe.' },
+  ussdInputTrail: { EN: 'Gateway input',        NY: 'Zolowa mu gateway' },
+  ussdServiceCode:{ EN: 'Service code',         NY: 'Nambala ya utumiki' },
+  ussdScreenChars:{ EN: 'chars of 182',         NY: 'zilembo mwa 182' },
+  ussdLog:        { EN: 'USSD sessions',        NY: 'Nthawi za USSD' },
+  statUssd:       { EN: 'USSD requests',        NY: 'Mapempho a USSD' },
+
+  // ---- admin ----
+  adminTitle:     { EN: 'Administrator dashboard', NY: 'Chiwonetsero cha woyanganira' },
+  statFarmers:    { EN: 'Farmers',               NY: 'Alimi' },
+  statRequests:   { EN: 'Advice requests',       NY: 'Mapempho a uphungu' },
+  statSms:        { EN: 'SMS requests',          NY: 'Mapempho a SMS' },
+  statWeb:        { EN: 'Web requests',          NY: 'Mapempho a webusaiti' },
+  mostAsked:      { EN: 'Most asked topics',     NY: 'Mitu yofunsidwa kwambiri' },
+  systemStatus:   { EN: 'System status',         NY: 'Mkhalidwe wa makina' },
+  registeredFarmers: { EN: 'Registered farmers', NY: 'Alimi olembetsa' },
+  allRequests:    { EN: 'All advice requests',   NY: 'Mapempho onse a uphungu' },
+  knowledgeBase:  { EN: 'Tea farming knowledge', NY: 'Nzeru za ulimi wa tiyi' },
+  smsLog:         { EN: 'SMS log',               NY: 'Kaundula wa SMS' },
+
+  // ---- new navigation ----
+  navTools:       { EN: 'Farm tools',            NY: 'Zida za munda' },
+  navCalendar:    { EN: 'Tea calendar',          NY: 'Kalendala ya tiyi' },
+  navHarvest:     { EN: 'Harvest diary',         NY: 'Kaundula wa zokolola' },
+  navMap:         { EN: 'Areas map',             NY: 'Mapu a madera' },
+  navPhones:      { EN: 'Basic phones',          NY: 'Mafoni osavuta' },
+  skipToContent:  { EN: 'Skip to main content',  NY: 'Pitani ku zomwe zili patsamba' },
+
+  // ---- home page (new sections) ----
+  heroBadge:      { EN: 'For tea farmers in Thyolo and Mulanje', NY: 'Kwa alimi a tiyi a ku Thyolo ndi Mulanje' },
+  liveWeatherTitle: { EN: 'Live weather in your area', NY: 'Nyengo ya pompano m\'dera lanu' },
+  liveWeatherText: { EN: 'Pick your area. MlimiSmart checks the weather here before it gives you any advice.',
+                    NY: 'Sankhani dera lanu. MlimiSmart amayang\'ana nyengo ya kuno asanakupatseni uphungu.' },
+  howTitle:       { EN: 'How it works',          NY: 'Momwe zimagwirira ntchito' },
+  how1:           { EN: 'Ask a question',        NY: 'Funsani funso' },
+  how1Text:       { EN: 'On the website, by SMS, or by dialling *384*211# on any phone.',
+                    NY: 'Pa webusaiti, pa SMS, kapena poyimba *384*211# pa foni iliyonse.' },
+  how2:           { EN: 'MlimiSmart checks',     NY: 'MlimiSmart amayang\'ana' },
+  how2Text:       { EN: 'Your area, the season, today\'s weather and tea farming knowledge.',
+                    NY: 'Dera lanu, nyengo ya chaka, nyengo ya lero ndi nzeru za ulimi wa tiyi.' },
+  how3:           { EN: 'You get clear advice',  NY: 'Mumalandira uphungu omveka' },
+  how3Text:       { EN: 'In English or Chichewa, with the reason behind it.',
+                    NY: 'Mu Chingerezi kapena Chichewa, pamodzi ndi chifukwa chake.' },
+  featureModels:  { EN: 'Learns every day', NY: 'Imaphunzira tsiku lililonse' },
+  featureModelsText: { EN: 'Trained on years of rainfall, temperature and soil moisture data for Thyolo and Mulanje, and on what farmers say about its advice.',
+                    NY: 'Yaphunzitsidwa ndi deta ya zaka zambiri ya mvula, kutentha ndi chinyezi cha nthaka ku Thyolo ndi Mulanje, komanso mayankho a alimi.' },
+  featureCalendar: { EN: 'Month-by-month calendar', NY: 'Kalendala ya mwezi uliwonse' },
+  featureCalendarText: { EN: 'The tea work for each month, from plucking rounds to pruning and planting.',
+                    NY: 'Ntchito za tiyi za mwezi uliwonse, kuyambira kusenda mpaka kutema ndi kubzala.' },
+  featureHarvest: { EN: 'Harvest and income diary', NY: 'Kaundula wa zokolola ndi ndalama' },
+  featureHarvestText: { EN: 'Record the kilograms you pluck and see your income month by month.',
+                    NY: 'Lembani makilogalamu omwe mwasenda ndipo muone ndalama zanu mwezi ndi mwezi.' },
+  featureAlerts:  { EN: 'Weather alerts',        NY: 'Machenjezo a nyengo' },
+  featureAlertsText: { EN: 'Warnings for heavy rain, heat, cold and dry spells, on screen and by SMS.',
+                    NY: 'Machenjezo a mvula yamphamvu, kutentha, kuzizira ndi chilala, pa sikirini ndi pa SMS.' },
+  areasTitle:     { EN: 'Areas we cover',        NY: 'Madera omwe timathandiza' },
+  areasText:      { EN: 'Each area gets its own forecast, because the hills around Bvumbwe and the plains near Thekerani have very different weather.',
+                    NY: 'Dera lililonse lili ndi nyengo yake, chifukwa mapiri a ku Bvumbwe ndi zigwa za ku Thekerani zili ndi nyengo zosiyana kwambiri.' },
+  seeMap:         { EN: 'See the map',           NY: 'Onani mapu' },
+  phonesTitle:    { EN: 'No smartphone? No problem.', NY: 'Mulibe foni yamakono? Palibe vuto.' },
+  phonesText:     { EN: 'Dial the USSD code or send an SMS. The same advice, the same weather, on any phone.',
+                    NY: 'Imbani nambala ya USSD kapena tumizani SMS. Uphungu womwewo, nyengo yomweyo, pa foni iliyonse.' },
+  tryUssd:        { EN: 'Try the USSD menu',     NY: 'Yesani menyu ya USSD' },
+  trySms:         { EN: 'Try SMS',               NY: 'Yesani SMS' },
+  poweredBy:      { EN: 'Weather by Open-Meteo · Wording by Google Gemini', NY: 'Nyengo: Open-Meteo · Mawu: Google Gemini' },
+
+  // ---- alerts ----
+  alertsTitle:    { EN: 'Weather alerts',        NY: 'Machenjezo a nyengo' },
+  noAlerts:       { EN: 'No weather warnings for the next three days.', NY: 'Palibe chenjezo la nyengo masiku atatu akubwerawa.' },
+  thisMonth:      { EN: 'This month on your farm', NY: 'Mwezi uno m\'munda mwanu' },
+  quickActions:   { EN: 'Quick actions',         NY: 'Zochita mwachangu' },
+  fullCalendar:   { EN: 'Full calendar',         NY: 'Kalendala yonse' },
+
+  // ---- advice extras ----
+  listen:         { EN: 'Listen',                NY: 'Mverani' },
+  stopListening:  { EN: 'Stop',                  NY: 'Imani' },
+  speakQuestion:  { EN: 'Speak your question',   NY: 'Lankhulani funso lanu' },
+  listeningNow:   { EN: 'Listening...',          NY: 'Ndikumvetsera...' },
+  shareWhatsapp:  { EN: 'Share on WhatsApp',     NY: 'Gawani pa WhatsApp' },
+  wasHelpful:     { EN: 'Was this advice helpful?', NY: 'Kodi uphungu uwu wakuthandizani?' },
+  yes:            { EN: 'Yes', NY: 'Inde' },
+  no:             { EN: 'No', NY: 'Ayi' },
+  thanksRating:   { EN: 'Thank you. Your answer helps MlimiSmart give better advice.', NY: 'Zikomo. Yankho lanu lithandiza MlimiSmart kupereka uphungu wabwino.' },
+  rainModelTitle: { EN: 'MlimiSmart rain prediction', NY: 'Kuneneratu kwa mvula kwa MlimiSmart' },
+  rainChanceOn:   { EN: 'chance of rain on', NY: 'mwayi wa mvula pa' },
+  rainExpected:   { EN: 'Rain is likely. Plan field work around it.', NY: 'Mvula ikuyembekezeka. Konzani ntchito za kumunda moyenera.' },
+  rainNotExpected:{ EN: 'A dry day is likely.', NY: 'Tsiku louma likuyembekezeka.' },
+  rainModelVersion:{ EN: 'Model version', NY: 'Mtundu wa model' },
+  testedAccuracy: { EN: 'tested accuracy', NY: 'kulondola koyesedwa' },
+  liveAccuracy:   { EN: 'checked against real rain', NY: 'kuyerekeza ndi mvula yeniyeni' },
+  ratingFailed:   { EN: 'Could not save your answer.', NY: 'Sitinathe kusunga yankho lanu.' },
+  aiWorded:       { EN: 'Worded by Gemini',      NY: 'Mawu a Gemini' },
+  today:          { EN: 'Today',                 NY: 'Lero' },
+  language:       { EN: 'Language',              NY: 'Chilankhulo' },
+  currentLanguage:{ EN: 'Current language',      NY: 'Chilankhulo chomwe chilipo' },
+  aiAnswered:     { EN: 'Answered by Gemini',    NY: 'Yankho la Gemini' },
+
+  // ---- calendar ----
+  calendarTitle:  { EN: 'Tea farming calendar',  NY: 'Kalendala ya ulimi wa tiyi' },
+  calendarIntro:  { EN: 'The main tea work for each month in Thyolo and Mulanje. MlimiSmart\'s daily advice adjusts this to the weather.',
+                    NY: 'Ntchito zazikulu za tiyi za mwezi uliwonse ku Thyolo ndi Mulanje. Uphungu wa tsiku ndi tsiku wa MlimiSmart umasintha izi malinga ndi nyengo.' },
+  nowBadge:       { EN: 'This month',            NY: 'Mwezi uno' },
+
+  // ---- harvest diary ----
+  harvestTitle:   { EN: 'Harvest diary',         NY: 'Kaundula wa zokolola' },
+  harvestIntro:   { EN: 'Write down each plucking round. MlimiSmart adds up your kilograms and income.',
+                    NY: 'Lembani kusenda kulikonse. MlimiSmart amawerengera makilogalamu ndi ndalama zanu.' },
+  harvestDate:    { EN: 'Date plucked',          NY: 'Tsiku losenda' },
+  harvestKg:      { EN: 'Green leaf (kg)',       NY: 'Masamba (kg)' },
+  harvestPrice:   { EN: 'Price per kg (MK)',     NY: 'Mtengo pa kg (MK)' },
+  harvestNotes:   { EN: 'Notes',                 NY: 'Zolemba' },
+  harvestAdd:     { EN: 'Add entry',             NY: 'Onjezani' },
+  harvestTotalKg: { EN: 'Total plucked',         NY: 'Zonse zosenda' },
+  harvestIncome:  { EN: 'Total income',          NY: 'Ndalama zonse' },
+  harvestMonth:   { EN: 'This month',            NY: 'Mwezi uno' },
+  harvestRounds:  { EN: 'Plucking rounds',       NY: 'Kusenda' },
+  harvestPerHa:   { EN: 'kg per hectare',        NY: 'kg pa hekitala' },
+  harvestChart:   { EN: 'Last 12 months',        NY: 'Miyezi 12 yapitayi' },
+  harvestEmpty:   { EN: 'No entries yet. Add your first plucking round above.', NY: 'Palibe zolemba. Onjezani kusenda koyamba pamwamba.' },
+  harvestDelete:  { EN: 'Delete',                NY: 'Chotsani' },
+  harvestIncomeCol: { EN: 'Income (MK)',         NY: 'Ndalama (MK)' },
+
+  // ---- map ----
+  mapTitle:       { EN: 'Tea areas of Thyolo and Mulanje', NY: 'Madera a tiyi a Thyolo ndi Mulanje' },
+  mapIntro:       { EN: 'Today\'s weather in every area MlimiSmart covers. Tap a marker for details.',
+                    NY: 'Nyengo ya lero m\'dera lililonse lomwe MlimiSmart amathandiza. Dinani chizindikiro kuti muone zambiri.' },
+  altitude:       { EN: 'Altitude',              NY: 'Kutalika' },
+  district:       { EN: 'District',              NY: 'Boma' },
+  allDistricts:   { EN: 'All',                   NY: 'Zonse' },
+  viewWeather:    { EN: 'Full forecast',         NY: 'Nyengo yonse' },
+
+  // ---- admin extras ----
+  broadcastTitle: { EN: 'Send a weather alert by SMS', NY: 'Tumizani chenjezo la nyengo pa SMS' },
+  broadcastIntro: { EN: 'Draft from the live forecast, edit if needed, then send to every farmer and subscriber in the area. Each person gets it in their own language.',
+                    NY: 'Lembani kuchokera ku nyengo ya pompano, sinthani ngati kuli kofunika, kenako tumizani kwa alimi onse a m\'deralo.' },
+  broadcastDraft: { EN: 'Draft from forecast',   NY: 'Lembani kuchokera ku nyengo' },
+  broadcastSend:  { EN: 'Send alert',            NY: 'Tumizani chenjezo' },
+  broadcastTarget: { EN: 'Send to',              NY: 'Tumizani kwa' },
+  broadcastSent:  { EN: 'Alert sent',            NY: 'Chenjezo latumizidwa' },
+  broadcastHistory: { EN: 'Sent alerts',         NY: 'Machenjezo otumizidwa' },
+  title:          { EN: 'Title',                 NY: 'Mutu' },
+  messageEn:      { EN: 'Message in English',    NY: 'Uthenga mu Chingerezi' },
+  messageNy:      { EN: 'Message in Chichewa',   NY: 'Uthenga mu Chichewa' },
+  statHarvestKg:  { EN: 'kg recorded',           NY: 'kg zolembedwa' },
+  statSubscribers: { EN: 'Alert subscribers',    NY: 'Olembetsa machenjezo' },
+  farmersByDistrict: { EN: 'Farmers by district', NY: 'Alimi pa boma' },
+
+  // ---- not found ----
+  notFoundTitle:  { EN: 'Page not found',        NY: 'Tsamba silinapezeke' },
+  notFoundText:   { EN: 'The page you are looking for does not exist.', NY: 'Tsamba lomwe mukufuna kulibe.' },
+  backHome:       { EN: 'Back to home',          NY: 'Bwererani kunyumba' },
+
+  // ---- shared ----
+  loading:        { EN: 'Loading...',            NY: 'Ikutsegula...' },
+  errorGeneric:   { EN: 'Something went wrong. Please try again.', NY: 'Chinachake chalakwika. Yesaninso.' },
+  cannotReachServer: { EN: 'Cannot reach the MlimiSmart server. Check that the backend is running.',
+                    NY: 'Sitikupeza seva ya MlimiSmart. Onani ngati backend ikuyenda.' },
+  english:        { EN: 'English',               NY: 'Chingerezi' },
+  chichewa:       { EN: 'Chichewa',              NY: 'Chichewa' },
+  footer:         { EN: '© 2026 MlimiSmart · Tea farming advice for Thyolo and Mulanje',
+                    NY: '© 2026 MlimiSmart · Uphungu wa ulimi wa tiyi ku Thyolo ndi Mulanje' },
+  navAbout:       { EN: 'About',                 NY: 'Za ife' },
+
+  // ---- admin database browser ----
+  dbTitle:        { EN: 'Database',              NY: 'Database' },
+  dbTables:       { EN: 'Tables',                NY: 'Matebulo' },
+  dbRefresh:      { EN: 'Refresh',               NY: 'Tsitsimutsani' },
+  dbReadOnly:     { EN: 'Read-only view of the MlimiSmart database. Passwords are never shown.',
+                    NY: 'Kuona kokha database ya MlimiSmart. Achinsinsi sawonetsedwa.' },
+  dbRows:         { EN: 'rows',                  NY: 'mizere' },
+  dbHidden:       { EN: 'hidden',                NY: 'zobisika' },
+  dbSearch:       { EN: 'Search this table',     NY: 'Sakani mu tebulo ili' },
+  dbSearchButton: { EN: 'Search',                NY: 'Sakani' },
+  dbClear:        { EN: 'Clear',                 NY: 'Chotsani' },
+  dbEmpty:        { EN: 'No rows found.',        NY: 'Palibe mizere.' },
+  dbPage:         { EN: 'Page',                  NY: 'Tsamba' },
+  dbPrev:         { EN: 'Previous',              NY: 'Yapitayo' },
+  dbNext:         { EN: 'Next',                  NY: 'Yotsatira' },
+  rainShort:      { EN: 'Rain',                  NY: 'Mvula' },
+
+  // ---- passwords ----
+  pwLength:       { EN: 'At least 8 characters', NY: 'Zilembo 8 kapena kuposerapo' },
+  pwMix:          { EN: 'Letters and numbers, e.g. Laur3n2026', NY: 'Zilembo ndi manambala, mwachitsanzo Laur3n2026' },
+  pwName:         { EN: 'Not your own name',     NY: 'Osati dzina lanu' },
+  pwPhone:        { EN: 'Not your phone number', NY: 'Osati nambala yanu ya foni' },
+  pwCommon:       { EN: 'Not an easy word like "password" or "malawi"', NY: 'Osati mawu osavuta ngati "password" kapena "malawi"' },
+  pwShow:         { EN: 'Show',                  NY: 'Onetsani' },
+  pwHide:         { EN: 'Hide',                  NY: 'Bisani' },
+  pwMet:          { EN: 'done',                  NY: 'zakwana' },
+  pwNotMet:       { EN: 'not yet',               NY: 'sizinakwane' },
+  pwChangeTitle:  { EN: 'Change password',       NY: 'Sinthani achinsinsi' },
+  pwCurrent:      { EN: 'Current password',      NY: 'Achinsinsi apano' },
+  pwNew:          { EN: 'New password',          NY: 'Achinsinsi atsopano' },
+  pwChangeButton: { EN: 'Change password',       NY: 'Sinthani achinsinsi' },
+  pwChanged:      { EN: 'Your password has been changed.', NY: 'Achinsinsi anu asinthidwa.' },
+}
+
+// Topic names, shown on advice cards and the admin dashboard.
+export const TOPIC_LABELS = {
+  fertilizer:   { EN: 'Fertilizer',         NY: 'Fetereza' },
+  plucking:     { EN: 'Plucking',           NY: 'Kusenda' },
+  pruning:      { EN: 'Pruning',            NY: 'Kutema' },
+  pest_disease: { EN: 'Pests and diseases', NY: 'Tizilombo ndi matenda' },
+  harvest:      { EN: 'Harvesting',         NY: 'Kokolola' },
+  weather:      { EN: 'Weather',            NY: 'Nyengo' },
+  planting:     { EN: 'Planting',           NY: 'Kubzala' },
+  shade:        { EN: 'Shade and soil',     NY: 'Mthunzi ndi nthaka' },
+  general:      { EN: 'General',            NY: 'Zonse' },
+}
+
+export const SEASON_LABELS = {
+  rainy:    { EN: 'Rainy season',    NY: 'Nyengo ya mvula' },
+  cool_dry: { EN: 'Cool dry season', NY: 'Nyengo yozizira youma' },
+  hot_dry:  { EN: 'Hot dry season',  NY: 'Nyengo yotentha youma' },
+}
+
+// Example questions offered on the dashboard and the ask page, taken from the
+// decisions farmers reported as hardest in the research questionnaire.
+export const SAMPLE_QUESTIONS = {
+  EN: [
+    'Should I apply fertilizer today?',
+    'When should I prune my tea?',
+    'Will it rain today?',
+    'How will the weather affect plucking?',
+    'When is the best time to pluck?',
+  ],
+  NY: [
+    'Kodi ndingathire fetereza lero?',
+    'Nditeme tiyi liti?',
+    'Kodi mvula igwa lero?',
+    'Kodi nyengo ingakhudze bwanji kusenda?',
+    'Ndisende tiyi liti?',
+  ],
+}
+
+export function t(key, language = 'EN') {
+  const entry = STRINGS[key]
+  if (!entry) return key
+  return entry[language] ?? entry.EN ?? key
+}
+
+export function topicLabel(topic, language = 'EN') {
+  return TOPIC_LABELS[topic]?.[language] ?? topic
+}
+
+export function seasonLabel(season, language = 'EN') {
+  return SEASON_LABELS[season]?.[language] ?? season
+}

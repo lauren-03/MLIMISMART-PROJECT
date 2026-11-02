@@ -1,0 +1,93 @@
+"""MlimiSmart API entry point."""
+import asyncio
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from .database import active_database_url, init_db
+from .ml import learning
+from .routers import (
+    admin, advisory, auth, db_browser, farm, models_admin, sms, ussd, weather,
+)
+from .services.intent_model import classifier
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-7s %(name)s  %(message)s",
+    datefmt="%H:%M:%S",
+)
+log = logging.getLogger("mlimismart")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Create the tables, train the topic classifier, start the learning cycle."""
+    init_db()
+    log.info("Database ready: %s", active_database_url.split("@")[-1])
+    classifier.train()
+    cycle = asyncio.create_task(learning.run_forever())
+    log.info("MlimiSmart API is ready")
+    yield
+    cycle.cancel()
+
+
+app = FastAPI(
+    title="MlimiSmart API",
+    description=(
+        "AI-based advisory system for smallholder tea farmers in Malawi. "
+        "Serves the React web application, the SMS channel and the USSD menu, "
+        "with Google Gemini for natural Chichewa/English wording."
+    ),
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+# The Vite dev server runs on 5173. Both loopback spellings are allowed because
+# the browser may resolve either.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173", "http://127.0.0.1:5173",
+        "http://localhost:4173", "http://127.0.0.1:4173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth.router)
+app.include_router(weather.router)
+app.include_router(advisory.router)
+app.include_router(sms.router)
+app.include_router(ussd.router)
+app.include_router(farm.router)
+app.include_router(admin.router)
+app.include_router(db_browser.router)
+app.include_router(models_admin.router)
+
+
+@app.get("/", tags=["health"])
+def root():
+    return {
+        "system": "MlimiSmart",
+        "description": "AI-based advisory system for smallholder tea farmers in Malawi",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "modules": [
+            "Farmer Management", "Weather", "AI Advisory",
+            "SMS Advisory", "USSD Advisory",
+            "Language (English/Chichewa)", "Admin",
+            "Tea Calendar", "Harvest Diary", "Weather Alerts",
+        ],
+    }
+
+
+@app.get("/api/health", tags=["health"])
+def health():
+    return {
+        "status": "ok",
+        "database": "mysql" if active_database_url.startswith("mysql") else "sqlite",
+        "classifier_trained": classifier.pipeline is not None,
+    }

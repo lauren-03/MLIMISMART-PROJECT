@@ -12,6 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Private settings and local data
+backend/.env
+backend/mlimismart.db
+backend/ml_store/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
