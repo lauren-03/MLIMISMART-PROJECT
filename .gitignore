@@ -33,3 +33,4 @@ backend/ml_store/
 *.sln
 *.sw?
 backend/tools/
+backend/voices/

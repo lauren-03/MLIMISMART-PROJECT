@@ -1,4 +1,4 @@
-"""Reads advice aloud with Meta's MMS voices (Chichewa and English)."""
+"""Reads advice aloud: Kasanoma (Piper) for Chichewa, Meta MMS for English."""
 import hashlib
 import io
 import logging
@@ -7,11 +7,16 @@ import threading
 import wave
 from collections import OrderedDict
 from concurrent.futures import Future, ThreadPoolExecutor
+from pathlib import Path
+
+from ..config import settings
 
 log = logging.getLogger(__name__)
 
 # Free for non-commercial use (CC-BY-NC 4.0).
 MODELS = {"NY": "facebook/mms-tts-nya", "EN": "facebook/mms-tts-eng"}
+# Chichewa Piper voice, kept in backend/voices (not in Git).
+KASANOMA = Path(__file__).resolve().parents[2] / "voices" / "kasanoma-chichewa" / "model.onnx"
 MAX_CHARS = 1200
 CACHE_SIZE = 200
 
@@ -24,13 +29,41 @@ _pending: dict[str, Future] = {}
 _pending_lock = threading.Lock()
 
 
-def available() -> bool:
+def _has_mms() -> bool:
     try:
         import torch  # noqa: F401
         import transformers  # noqa: F401
     except ImportError:
         return False
     return True
+
+
+def _use_kasanoma(language: str) -> bool:
+    if language != "NY" or settings.chichewa_voice != "kasanoma" or not KASANOMA.exists():
+        return False
+    try:
+        import piper  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+def available() -> bool:
+    return _has_mms() or _use_kasanoma("NY")
+
+
+def voice_name(language: str) -> str:
+    return "Kasanoma (Piper)" if _use_kasanoma(language) else MODELS[language]
+
+
+def _piper():
+    with _lock:
+        if "piper" not in _loaded:
+            from piper import PiperVoice
+
+            log.info("Loading voice %s", KASANOMA.parent.name)
+            _loaded["piper"] = PiperVoice.load(str(KASANOMA))
+        return _loaded["piper"]
 
 
 def _model(language: str):
@@ -120,9 +153,12 @@ def _key(text: str, language: str) -> str:
 
 def warm_up() -> None:
     """Load both voices in the background when the API starts."""
-    if available():
+    if _use_kasanoma("NY"):
+        _worker.submit(_piper)
+    if _has_mms():
         for language in MODELS:
-            _worker.submit(_model, language)
+            if not _use_kasanoma(language):
+                _worker.submit(_model, language)
 
 
 def prepare(text: str, language: str) -> None:
@@ -158,6 +194,12 @@ def _generate(text: str, language: str, key: str) -> bytes:
     if key in _cache:
         return _cache[key]
 
+    if _use_kasanoma(language):
+        buffer = io.BytesIO()
+        with wave.open(buffer, "wb") as out:
+            _piper().synthesize_wav(" ".join(_sentences(text, language)), out)
+        return _remember(key, buffer.getvalue())
+
     model, tokenizer = _model(language)
     rate = model.config.sampling_rate
     pause = np.zeros(int(rate * 0.25), dtype="float32")
@@ -169,8 +211,10 @@ def _generate(text: str, language: str, key: str) -> bytes:
                 continue
             pieces.append(model(**inputs).waveform[0].numpy())
             pieces.append(pause)
-    audio = _to_wav(np.concatenate(pieces) if pieces else pause, rate)
+    return _remember(key, _to_wav(np.concatenate(pieces) if pieces else pause, rate))
 
+
+def _remember(key: str, audio: bytes) -> bytes:
     _cache[key] = audio
     if len(_cache) > CACHE_SIZE:
         _cache.popitem(last=False)

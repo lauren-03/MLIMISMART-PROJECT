@@ -25,4 +25,5 @@ async def speak(payload: SpeechIn):
 
 @router.get("/status")
 def status():
-    return {"available": speech_service.available(), "voices": speech_service.MODELS}
+    return {"available": speech_service.available(),
+            "voices": {lang: speech_service.voice_name(lang) for lang in ("NY", "EN")}}

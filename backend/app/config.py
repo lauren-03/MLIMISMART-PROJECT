@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     public_url: str = ""
     start_tunnel: bool = False
 
+    # Chichewa voice for "Listen": "kasanoma" (fast Piper voice) or "mms" (Meta)
+    chichewa_voice: str = "kasanoma"
+
     # Seeded admin
     admin_phone: str = "0999000000"
     admin_password: str = "admin123"
