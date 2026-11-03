@@ -1,0 +1,177 @@
+"""Reads advice aloud with Meta's MMS voices (Chichewa and English)."""
+import hashlib
+import io
+import logging
+import re
+import threading
+import wave
+from collections import OrderedDict
+from concurrent.futures import Future, ThreadPoolExecutor
+
+log = logging.getLogger(__name__)
+
+# Free for non-commercial use (CC-BY-NC 4.0).
+MODELS = {"NY": "facebook/mms-tts-nya", "EN": "facebook/mms-tts-eng"}
+MAX_CHARS = 1200
+CACHE_SIZE = 200
+
+_loaded: dict[str, tuple] = {}
+_lock = threading.Lock()
+_cache: "OrderedDict[str, bytes]" = OrderedDict()
+# One worker, so voice generation never competes with itself for the CPU.
+_worker = ThreadPoolExecutor(max_workers=1, thread_name_prefix="voice")
+_pending: dict[str, Future] = {}
+_pending_lock = threading.Lock()
+
+
+def available() -> bool:
+    try:
+        import torch  # noqa: F401
+        import transformers  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+def _model(language: str):
+    with _lock:
+        if language not in _loaded:
+            from transformers import AutoTokenizer, VitsModel
+
+            name = MODELS[language]
+            log.info("Loading voice %s", name)
+            model = VitsModel.from_pretrained(name)
+            model.eval()
+            _loaded[language] = (model, AutoTokenizer.from_pretrained(name))
+        return _loaded[language]
+
+
+EN_ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+           "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
+           "eighteen", "nineteen"]
+EN_TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+NY_ONES = ["ziro", "chimodzi", "ziwiri", "zitatu", "zinayi", "zisanu", "zisanu ndi chimodzi",
+           "zisanu ndi ziwiri", "zisanu ndi zitatu", "zisanu ndi zinayi"]
+NY_TENS = ["", "khumi", "makumi awiri", "makumi atatu", "makumi anayi", "makumi asanu",
+           "makumi asanu ndi limodzi", "makumi asanu ndi awiri", "makumi asanu ndi atatu",
+           "makumi asanu ndi anayi"]
+NY_HUNDREDS = ["", "zana limodzi", "mazana awiri", "mazana atatu", "mazana anayi", "mazana asanu",
+               "mazana asanu ndi limodzi", "mazana asanu ndi awiri", "mazana asanu ndi atatu",
+               "mazana asanu ndi anayi"]
+
+
+def _number_words(n: int, language: str) -> str:
+    if n >= 1000:
+        return str(n)
+    if language == "NY":
+        parts = []
+        if n >= 100:
+            parts.append(NY_HUNDREDS[n // 100])
+            n %= 100
+        if n >= 10:
+            parts.append(NY_TENS[n // 10])
+            n %= 10
+        if n or not parts:
+            parts.append(NY_ONES[n])
+        return " ndi ".join(parts)
+    words = []
+    if n >= 100:
+        words.append(f"{EN_ONES[n // 100]} hundred")
+        n %= 100
+        if n:
+            words.append("and")
+    if n >= 20:
+        words.append(EN_TENS[n // 10] + (f" {EN_ONES[n % 10]}" if n % 10 else ""))
+    elif n or not words:
+        words.append(EN_ONES[n])
+    return " ".join(words)
+
+
+def _sentences(text: str, language: str) -> list[str]:
+    text = re.sub(r"\s+", " ", text).strip()[:MAX_CHARS]
+    # Symbols the voices cannot read.
+    words = {"NY": (" peresenti", " digiri", " milimita"), "EN": (" percent", " degrees", " millimetres")}
+    percent, degrees, mm = words[language]
+    text = text.replace("%", percent).replace("°C", degrees)
+    text = re.sub(r"(\d)\s?C\b", r"\1" + degrees, text)
+    text = re.sub(r"(\d)\s?mm\b", r"\1" + mm, text)
+    # Decimals are rounded; the voices have no letters for digits.
+    text = re.sub(r"\d+(?:\.\d+)?", lambda m: _number_words(round(float(m.group())), language), text)
+    parts = re.split(r"(?<=[.!?;:])\s+", text)
+    return [p for p in parts if re.search(r"[A-Za-z]", p)]
+
+
+def _to_wav(samples, rate: int) -> bytes:
+    import numpy as np
+
+    pcm = (np.clip(samples, -1.0, 1.0) * 32767).astype("<i2")
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(rate)
+        out.writeframes(pcm.tobytes())
+    return buffer.getvalue()
+
+
+def _key(text: str, language: str) -> str:
+    return hashlib.sha1(f"{language}:{text}".encode()).hexdigest()
+
+
+def warm_up() -> None:
+    """Load both voices in the background when the API starts."""
+    if available():
+        for language in MODELS:
+            _worker.submit(_model, language)
+
+
+def prepare(text: str, language: str) -> None:
+    """Start making the audio now, so Listen plays at once later."""
+    if available() and text:
+        _submit(text, "NY" if language == "NY" else "EN")
+
+
+def _submit(text: str, language: str) -> Future:
+    key = _key(text, language)
+    with _pending_lock:
+        if key not in _pending:
+            future = _worker.submit(_generate, text, language, key)
+            future.add_done_callback(lambda _: _pending.pop(key, None))
+            _pending[key] = future
+        return _pending[key]
+
+
+def synthesize(text: str, language: str) -> bytes:
+    """WAV audio of `text` spoken in Chichewa (NY) or English (EN)."""
+    language = "NY" if language == "NY" else "EN"
+    key = _key(text, language)
+    if key in _cache:
+        _cache.move_to_end(key)
+        return _cache[key]
+    return _submit(text, language).result()
+
+
+def _generate(text: str, language: str, key: str) -> bytes:
+    import numpy as np
+    import torch
+
+    if key in _cache:
+        return _cache[key]
+
+    model, tokenizer = _model(language)
+    rate = model.config.sampling_rate
+    pause = np.zeros(int(rate * 0.25), dtype="float32")
+    pieces = []
+    with torch.no_grad():
+        for sentence in _sentences(text, language):
+            inputs = tokenizer(sentence, return_tensors="pt")
+            if inputs["input_ids"].shape[-1] == 0:
+                continue
+            pieces.append(model(**inputs).waveform[0].numpy())
+            pieces.append(pause)
+    audio = _to_wav(np.concatenate(pieces) if pieces else pause, rate)
+
+    _cache[key] = audio
+    if len(_cache) > CACHE_SIZE:
+        _cache.popitem(last=False)
+    return audio

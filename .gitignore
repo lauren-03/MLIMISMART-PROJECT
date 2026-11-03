@@ -32,3 +32,4 @@ backend/ml_store/
 *.njsproj
 *.sln
 *.sw?
+backend/tools/

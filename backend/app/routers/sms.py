@@ -2,23 +2,30 @@
 import logging
 from datetime import date
 
-from fastapi import APIRouter, Depends, Form, Request
+import hashlib
+import hmac
+import json
+import time
+from collections import deque
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from ..data.knowledge_base import msg
 from ..data.locations import DISTRICTS, LOCATIONS, areas_in, match
 from ..data.tea_calendar import month_text
-from ..database import get_db
+from ..config import settings
+from ..database import SessionLocal, get_db
 from ..schemas import SmsIn, SmsOut
-from ..services import advisory_service, profiles, sms_service, weather_service
+from ..services import advisory_service, profiles, sms_service, tunnel, weather_service
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/sms", tags=["sms"])
 
 
-async def _handle(db: Session, phone: str, text: str) -> dict:
+async def _handle(db: Session, phone: str, text: str, source: str | None = None) -> dict:
     """Shared handling for an inbound SMS, whatever the source."""
-    sms_service.log_incoming(db, phone, text)
+    sms_service.log_incoming(db, phone, text, source)
 
     farmer = profiles.find_farmer(db, phone)
     saved_language = profiles.language_for(db, phone, farmer)
@@ -159,7 +166,58 @@ async def incoming(
     return {"status": "ok"}
 
 
+# Message ids already answered, so a webhook delivered twice gets one reply.
+_seen: deque[str] = deque(maxlen=500)
+
+
+def _check_signature(raw: bytes, request: Request) -> None:
+    key = settings.android_sms_signing_key
+    if not key:
+        return
+    signature = request.headers.get("X-Signature", "")
+    stamp = request.headers.get("X-Timestamp", "")
+    if not stamp.isdigit() or abs(time.time() - int(stamp)) > 300:
+        raise HTTPException(status_code=401, detail="Old or missing timestamp")
+    expected = hmac.new(key.encode(), raw + stamp.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, signature.lower()):
+        raise HTTPException(status_code=401, detail="Bad signature")
+
+
+async def _answer_android(sender: str, body: str) -> None:
+    db = SessionLocal()
+    try:
+        outcome = await _handle(db, sender, body, "android")
+        await sms_service.send_sms(db, sender, outcome["reply"], limit=outcome["limit"])
+    except Exception:  # noqa: BLE001
+        log.exception("Could not answer the SMS from %s", sender)
+    finally:
+        db.close()
+
+
+@router.post("/android")
+async def android(request: Request, background: BackgroundTasks):
+    """SMS Gateway for Android webhook: a farmer texted the gateway phone."""
+    raw = await request.body()
+    _check_signature(raw, request)
+    data = json.loads(raw or b"{}")
+    if data.get("event") != "sms:received":
+        return {"status": "ignored"}
+    payload = data.get("payload") or {}
+    message_id = str(payload.get("messageId") or data.get("id") or "")
+    sender = str(payload.get("sender") or payload.get("phoneNumber") or "")
+    body = str(payload.get("message") or "")
+    if not sender or not body:
+        return {"status": "ignored"}
+    if message_id and message_id in _seen:
+        return {"status": "duplicate"}
+    if message_id:
+        _seen.append(message_id)
+    # Answer after returning, so the phone is not kept waiting.
+    background.add_task(_answer_android, sender, body)
+    return {"status": "ok"}
+
+
 @router.get("/status")
 def status():
-    """Which SMS mode is active, shown on the simulator screen."""
-    return sms_service.status()
+    """Which SMS gateway is active, and the public address gateways call."""
+    return {**sms_service.status(), "public_url": tunnel.public_url() or None}

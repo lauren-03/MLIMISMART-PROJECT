@@ -105,17 +105,16 @@ export function Footer({ flush = false }) {
     <footer className="footer-mlimi" style={flush ? { marginTop: 0 } : undefined}>
       <div className="container">
         <div className="row g-4">
-          <div className="col-lg-4">
+          <div className="col-lg-6">
             <div className="d-flex align-items-center mb-2">
               <img src="/leaf.svg" alt="" className="brand-leaf" />
               <span className="fs-5 fw-bold text-white" style={{ fontFamily: 'var(--font-head)' }}>
                 MlimiSmart
               </span>
             </div>
-            <p className="small mb-2">{t('tagline')}.</p>
-            <p className="small mb-0 opacity-75">{t('poweredBy')}</p>
+            <p className="small mb-0">{t('tagline')}.</p>
           </div>
-          <div className="col-6 col-lg-2">
+          <div className="col-6 col-lg-3">
             <h2>{t('navTools')}</h2>
             <ul className="small">
               <li><Link to={farmer ? '/dashboard' : '/login'}>{t('navDashboard')}</Link></li>
@@ -123,7 +122,7 @@ export function Footer({ flush = false }) {
               <li><Link to="/harvest">{t('navHarvest')}</Link></li>
             </ul>
           </div>
-          <div className="col-6 col-lg-2">
+          <div className="col-6 col-lg-3">
             <h2>{t('navPhones')}</h2>
             <ul className="small">
               <li><Link to="/ussd">USSD *384*211#</Link></li>
@@ -131,17 +130,6 @@ export function Footer({ flush = false }) {
               <li><Link to="/map">{t('navMap')}</Link></li>
               <li><Link to="/about">{t('navAbout')}</Link></li>
             </ul>
-          </div>
-          <div className="col-lg-4">
-            <h2>{t('areasTitle')}</h2>
-            <p className="small mb-1">
-              <strong className="text-white">Thyolo:</strong> Thyolo Boma, Luchenza, Bvumbwe, Thekerani,
-              Makwasa, Khonjeni, Masambanjati, Malamulo, Satemwa, Nchima, Goliati
-            </p>
-            <p className="small mb-0">
-              <strong className="text-white">Mulanje:</strong> Mulanje Boma, Chitakale, Mimosa, Lujeri,
-              Muloza, Chisitu, Limbuli, Thuchila, Chonde, Kambenje, Nkando, Milonde
-            </p>
           </div>
         </div>
         <div className="footer-bottom d-flex justify-content-between flex-wrap gap-2">

@@ -1,6 +1,6 @@
-// One piece of advice, with "Listen", "Share" and a helpful / not helpful
+// One piece of advice, with "Listen" and a helpful / not helpful
 // rating. Ratings are sent to the advice model, which retrains on them.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { api } from '../api/client'
 import { useApp } from '../context/AppContext'
@@ -12,12 +12,13 @@ const URGENCY_STYLE = {
   normal: { css: 'advice-normal', badge: 'bg-success', key: 'normal', icon: 'check-circle-fill' },
 }
 
-const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window
+const browserVoice = typeof window !== 'undefined' && 'speechSynthesis' in window
 
 export default function AdviceCard({ advice, showReasoning = true }) {
   const { farmer, language, t } = useApp()
   const [open, setOpen] = useState(false)
-  const [speaking, setSpeaking] = useState(false)
+  const [voice, setVoice] = useState('idle') // idle | loading | playing
+  const player = useRef(null)
   const [rating, setRating] = useState(null)
   const [ratingError, setRatingError] = useState(false)
 
@@ -26,8 +27,18 @@ export default function AdviceCard({ advice, showReasoning = true }) {
     setRatingError(false)
   }, [advice?.request_id])
 
+  const stop = () => {
+    player.current?.pause()
+    player.current = null
+    if (browserVoice) window.speechSynthesis.cancel()
+    setVoice('idle')
+  }
+
   // Stop reading if the card disappears or the advice changes.
-  useEffect(() => () => canSpeak && window.speechSynthesis.cancel(), [advice])
+  useEffect(() => () => {
+    player.current?.pause()
+    if (browserVoice) window.speechSynthesis.cancel()
+  }, [advice])
 
   if (!advice) return null
 
@@ -35,21 +46,35 @@ export default function AdviceCard({ advice, showReasoning = true }) {
   const fromGemini = advice.source === 'gemini' || advice.source === 'llm'
   const openAnswer = advice.rules_fired?.some((rule) => rule.includes('Gemini answered'))
 
-  const speak = () => {
-    if (!canSpeak) return
-    if (speaking) {
-      window.speechSynthesis.cancel()
-      setSpeaking(false)
-      return
-    }
+  const spokenLanguage = advice.language || language
+
+  // Browser voice, used only when the server voice is not available.
+  const speakInBrowser = () => {
+    if (!browserVoice) return setVoice('idle')
     const utterance = new SpeechSynthesisUtterance(advice.advice)
-    utterance.lang = language === 'NY' ? 'ny-MW' : 'en-GB'
-    utterance.rate = 0.92
-    utterance.onend = () => setSpeaking(false)
-    utterance.onerror = () => setSpeaking(false)
+    utterance.lang = spokenLanguage === 'NY' ? 'ny-MW' : 'en-GB'
+    utterance.onend = () => setVoice('idle')
+    utterance.onerror = () => setVoice('idle')
     window.speechSynthesis.cancel()
     window.speechSynthesis.speak(utterance)
-    setSpeaking(true)
+    setVoice('playing')
+  }
+
+  const speak = async () => {
+    if (voice !== 'idle') return stop()
+    setVoice('loading')
+    try {
+      const { data } = await api.post('/speech', { text: advice.advice, language: spokenLanguage },
+        { responseType: 'blob', timeout: 120000 })
+      const audio = new Audio(URL.createObjectURL(data))
+      player.current = audio
+      audio.onended = () => setVoice('idle')
+      audio.onerror = () => setVoice('idle')
+      await audio.play()
+      setVoice('playing')
+    } catch {
+      speakInBrowser()
+    }
   }
 
   const canRate = farmer && advice.request_id && advice.action
@@ -63,9 +88,6 @@ export default function AdviceCard({ advice, showReasoning = true }) {
       setRatingError(true)
     }
   }
-
-  const shareText = `MlimiSmart (${advice.location}): ${advice.advice}`
-  const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`
 
   return (
     <div className={`card card-mlimi ${style.css} mb-3`}>
@@ -99,15 +121,12 @@ export default function AdviceCard({ advice, showReasoning = true }) {
         )}
 
         <div className="d-flex flex-wrap gap-2 align-items-center">
-          {canSpeak && (
+          {(
             <button type="button" className="btn btn-sm btn-outline-tea" onClick={speak}
-                    aria-pressed={speaking}>
-              {speaking ? t('stopListening') : t('listen')}
+                    aria-pressed={voice !== 'idle'}>
+              {voice === 'loading' ? t('voiceLoading') : voice === 'playing' ? t('stopListening') : t('listen')}
             </button>
           )}
-          <a className="btn btn-sm btn-outline-tea" href={shareUrl} target="_blank" rel="noreferrer">
-            {t('shareWhatsapp')}
-          </a>
           {showReasoning && advice.rules_fired?.length > 0 && (
             <button
               type="button"

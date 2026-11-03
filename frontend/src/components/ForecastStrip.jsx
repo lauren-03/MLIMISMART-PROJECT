@@ -17,7 +17,7 @@ export default function ForecastStrip({ forecast }) {
             <WeatherIcon code={day.code} className="wx-dayicon" />
             <div className="wx-max">{Math.round(day.temp_max)}°</div>
             <div className="wx-min">{Math.round(day.temp_min)}°</div>
-            <div className="wx-rain">{t('rainShort')} {day.rain_probability}%</div>
+            <div className="wx-rain">{t('rainShort')} {day.rain_probability !== null && day.rain_probability !== undefined ? `${day.rain_probability}%` : `${day.rain_mm ?? '--'} mm`}</div>
             <div className="wx-cond d-none d-md-block">
               {language === 'NY' ? day.condition_ny : day.condition_en}
             </div>

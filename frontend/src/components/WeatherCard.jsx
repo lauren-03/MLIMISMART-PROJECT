@@ -70,10 +70,25 @@ export default function WeatherCard({ weather }) {
       </div>
 
       <div className="wx-facts">
-        <span>{t('rainChance')} <strong>{value(current.rain_probability, '%')}</strong></span>
+        {current.rain_probability === null && current.rain_today_mm !== null ? (
+          <span>{t('rainToday')} <strong>{value(current.rain_today_mm, ' mm')}</strong></span>
+        ) : (
+          <span>{t('rainChance')} <strong>{value(current.rain_probability, '%')}</strong></span>
+        )}
         <span>{t('humidity')} <strong>{value(current.humidity, '%')}</strong></span>
         <span>{t('wind')} <strong>{value(current.wind_kph, ' km/h')}</strong></span>
       </div>
+
+      {weather.stale && (
+        <div className="wx-updated">{t('lastUpdated')} {timeAgo(weather.observed_at, t)}</div>
+      )}
     </div>
   )
+}
+
+function timeAgo(iso, t) {
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000))
+  if (minutes < 1) return t('justNow')
+  if (minutes < 60) return `${t('updated')} ${minutes} min`
+  return `${t('updated')} ${Math.round(minutes / 60)} h`
 }

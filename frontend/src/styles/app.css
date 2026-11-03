@@ -1487,3 +1487,11 @@ h2.text-uppercase, h3.text-uppercase, .h6.text-uppercase, .small.text-uppercase 
   .navbar-mlimi .lang-popover { left: 0; right: auto; }
   .navbar-mlimi .lang-popover::before { left: 22px; right: auto; }
 }
+.wx-updated { margin-top: 0.8rem; text-align: right; color: var(--muted); font-size: 0.82rem; }
+
+/* SMS and USSD pages */
+.sms-number { font-size: 2rem; font-weight: 700; color: var(--tea-dark); margin: 0.1rem 0 0.4rem; }
+.sms-log { display: flex; flex-direction: column; gap: 0.5rem; max-height: 520px; overflow-y: auto; }
+.sms-log .sms-bubble { max-width: 85%; }
+.sms-log .sms-in { align-self: flex-start; }
+.sms-log .sms-out { align-self: flex-end; }

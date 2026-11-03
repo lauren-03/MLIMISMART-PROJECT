@@ -109,7 +109,7 @@ export default function AreasMap() {
                               {language === 'NY' ? area.condition_ny : area.condition_en}
                               <div>
                                 {Math.round(area.temp_min)}° – {Math.round(area.temp_max)}°C ·{' '}
-                                <span className="rain-figure">{t('rainShort')} {area.rain_probability}%</span>
+                                <span className="rain-figure">{t('rainShort')} {area.rain_probability === null || area.rain_probability === undefined ? '--' : `${area.rain_probability}%`}</span>
                               </div>
                             </div>
                           )}
@@ -150,7 +150,7 @@ export default function AreasMap() {
                           <WeatherIcon code={area.code} className="text-success me-1" />
                           <strong>{Math.round(area.temperature)}°</strong>
                           <span className="d-block rain-figure">
-                            {t('rainShort')} {area.rain_probability}%
+                            {t('rainShort')} {area.rain_probability === null || area.rain_probability === undefined ? '--' : `${area.rain_probability}%`}
                           </span>
                         </span>
                       )}

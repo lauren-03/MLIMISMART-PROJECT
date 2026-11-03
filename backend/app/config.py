@@ -23,11 +23,28 @@ class Settings(BaseSettings):
     # Tried if the main model is retired or unavailable to this key.
     gemini_fallback_model: str = "gemini-flash-latest"
 
-    # SMS
-    sms_enabled: bool = False
+    # SMS gateway: "android" (SMS Gateway for Android app on a real phone),
+    # "africastalking", or "simulator" (no real messages).
+    sms_gateway: str = "simulator"
+    sms_enabled: bool = False          # older setting: true means Africa's Talking
+    sms_number: str = ""               # the number farmers text, shown on the website
+
+    # SMS Gateway for Android (Local Server mode, shown on the app's Home tab)
+    android_sms_url: str = ""          # e.g. http://192.168.1.20:8080
+    android_sms_username: str = ""
+    android_sms_password: str = ""
+    android_sms_signing_key: str = ""  # Settings > Webhooks > Signing Key in the app
+
+    # Africa's Talking (SMS and the USSD sandbox)
     at_username: str = "sandbox"
     at_api_key: str = ""
     at_sender_id: str = ""
+    ussd_code: str = "*384*211#"
+
+    # Public HTTPS address for gateway callbacks. Leave empty to let the API
+    # open a free Cloudflare quick tunnel when it starts.
+    public_url: str = ""
+    start_tunnel: bool = False
 
     # Seeded admin
     admin_phone: str = "0999000000"

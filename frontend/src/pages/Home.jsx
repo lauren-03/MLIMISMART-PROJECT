@@ -188,7 +188,7 @@ export default function Home() {
               <h2 id="topics" className="section-title">{t('topicsTitle')}</h2>
               <div className="mb-4">
                 {Object.entries(TOPIC_LABELS)
-                  .filter(([key]) => key !== 'general')
+                  .filter(([key]) => !['general', 'pest_disease', 'shade'].includes(key))
                   .map(([key, labels]) => (
                     <span className="chip" key={key} style={{ cursor: 'default' }}>
                       {labels[language]}

@@ -382,8 +382,8 @@ async def _weather_branch(db: Session, session: UssdSession, parts: list[str],
         lines = [location.upper()]
         for day in weather["forecast"][:5]:
             lines.append(
-                f"{day['weekday']} {round(day['temp_max'])}C "
-                f"{day['rain_probability']}%"
+                f"{day['weekday']} {round(day['temp_max'])}C " +
+                (f"{day['rain_probability']}%" if day['rain_probability'] is not None else f"{day['rain_mm']}mm")
             )
         db.commit()
         return render("\n".join(lines), language, footer_key="back")
@@ -399,13 +399,13 @@ async def _weather_branch(db: Session, session: UssdSession, parts: list[str],
         body = (f"NYENGO - {location}\n"
                 f"{condition}\n"
                 f"Kutentha: {current['temperature']}C\n"
-                f"Mvula: {current['rain_probability']}%\n"
+                f"Mvula: {_rain_text(current)}\n"
                 f"Chinyezi: {current['humidity']}%")
     else:
         body = (f"WEATHER - {location}\n"
                 f"{condition}\n"
                 f"Temp: {current['temperature']}C\n"
-                f"Rain: {current['rain_probability']}%\n"
+                f"Rain: {_rain_text(current)}\n"
                 f"Humidity: {current['humidity']}%")
     db.commit()
     return render(body, language, footer_key="forecast_back")
@@ -702,11 +702,23 @@ def status() -> dict:
     """Reported on the admin dashboard and the simulator screen."""
     from ..config import settings
 
-    live = bool(settings.sms_enabled and settings.at_api_key)
+    from . import tunnel
+
+    live = bool(settings.at_api_key)
+    base = tunnel.public_url()
     return {
-        "mode": "africastalking" if live else "simulator",
+        "mode": ("africastalking-sandbox" if settings.at_username == "sandbox" else "africastalking")
+        if live else "simulator",
         "gateway": "Africa's Talking",
-        "service_code": SERVICE_CODE,
+        "service_code": settings.ussd_code or SERVICE_CODE,
+        "callback_url": f"{base}/api/ussd" if base else None,
         "screen_limit": SCREEN_LIMIT,
         "configured": bool(settings.at_api_key),
     }
+
+
+def _rain_text(current: dict) -> str:
+    """Chance of rain as a percentage, or the expected amount when there is none."""
+    if current.get("rain_probability") is not None:
+        return f"{current['rain_probability']}%"
+    return f"{current.get('rain_today_mm') or 0}mm"

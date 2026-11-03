@@ -1,11 +1,10 @@
 // Farmer dashboard.
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { api, errorMessage } from '../api/client'
 import AdviceCard from '../components/AdviceCard'
 import ForecastStrip from '../components/ForecastStrip'
-import QuestionBox from '../components/QuestionBox'
 import { AlertList, ErrorBox, Footer, Spinner } from '../components/Shared'
 import RainPredictionCard from '../components/RainPredictionCard'
 import WeatherCard from '../components/WeatherCard'
@@ -32,9 +31,7 @@ export default function Dashboard() {
   const [weather, setWeather] = useState(null)
   const [daily, setDaily] = useState(null)
   const [month, setMonth] = useState(null)
-  const [answer, setAnswer] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [asking, setAsking] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -62,22 +59,6 @@ export default function Dashboard() {
       cancelled = true
     }
   }, [language, t])
-
-  const ask = useCallback(
-    async (question) => {
-      setAsking(true)
-      setError(null)
-      try {
-        const { data } = await api.post('/advice/ask', { question })
-        setAnswer(data)
-      } catch (err) {
-        setError(errorMessage(err, t('errorGeneric')) ?? 'network')
-      } finally {
-        setAsking(false)
-      }
-    },
-    [t],
-  )
 
   if (loading) return <Spinner />
 
@@ -111,7 +92,7 @@ export default function Dashboard() {
           </div>
           <div className="col-lg-7">
             <h2 className="h6 text-uppercase text-muted mb-2">{t('todaysAdvice')}</h2>
-            <AdviceCard advice={daily} />
+            <AdviceCard advice={daily} showReasoning={false} />
             <h2 className="h6 text-uppercase text-muted mb-2 mt-3">{t('alertsTitle')}</h2>
             <AlertList alerts={weather?.alerts} />
           </div>
@@ -152,14 +133,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <hr className="my-4" />
-
-        <h2 className="h5 text-tea mb-3">{t('askAnything')}</h2>
-        <QuestionBox onAsk={ask} busy={asking} />
-        <div aria-live="polite">
-          {asking && <Spinner label={t('asking')} />}
-          {answer && <AdviceCard advice={answer} />}
-        </div>
       </div>
       <Footer />
     </>

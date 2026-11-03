@@ -12,3 +12,6 @@ httpx==0.28.1
 scikit-learn==1.6.0
 rasterio==1.5.2
 python-multipart==0.0.20
+# Chichewa/English voice (CPU build: pip install torch --index-url https://download.pytorch.org/whl/cpu)
+torch==2.15.0
+transformers==4.57.6

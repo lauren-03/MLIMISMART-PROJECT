@@ -8,6 +8,7 @@ from . import advice_model, climate, history, rain_model, store
 log = logging.getLogger(__name__)
 
 DAY_SECONDS = 24 * 60 * 60
+RETRY_SECONDS = 60 * 60
 _lock = asyncio.Lock()
 
 
@@ -24,8 +25,12 @@ async def retrain(which: str) -> dict:
         return await asyncio.to_thread(_train, which)
 
 
-async def daily_cycle() -> None:
-    """New weather -> check old predictions -> retrain -> predict tomorrow."""
+async def daily_cycle() -> bool:
+    """New weather -> check old predictions -> retrain -> predict tomorrow.
+
+    Returns False when the weather history could not be downloaded.
+    """
+    ok = True
     db = SessionLocal()
     try:
         added = await history.update(db)
@@ -33,6 +38,7 @@ async def daily_cycle() -> None:
         log.info("Learning cycle: %d new weather days, %d predictions checked", added, checked)
     except Exception:  # noqa: BLE001 - keep serving with the existing models
         log.exception("Weather history update failed")
+        ok = False
     finally:
         db.close()
 
@@ -54,12 +60,14 @@ async def daily_cycle() -> None:
             rain_model.predict_all(db)
     finally:
         db.close()
+    return ok
 
 
 async def run_forever() -> None:
     while True:
-        await daily_cycle()
-        await asyncio.sleep(DAY_SECONDS)
+        ok = await daily_cycle()
+        # If the weather service was down, try again in an hour instead of a day.
+        await asyncio.sleep(DAY_SECONDS if ok else RETRY_SECONDS)
 
 
 async def after_rating() -> None:

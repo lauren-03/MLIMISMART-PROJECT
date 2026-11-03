@@ -38,9 +38,10 @@ async def update(db: Session) -> int:
     refining the most recent days.
     """
     recent_start = date.today() - timedelta(days=1)
-    db.query(WeatherHistory).filter(WeatherHistory.day >= recent_start).delete()
-    db.commit()
-    latest = latest_per_area(db)
+    # Treat yesterday and today as not stored yet. The old rows are only
+    # deleted once the new ones have downloaded, so a failed download loses nothing.
+    keep_until = recent_start - timedelta(days=1)
+    latest = {name: min(day, keep_until) for name, day in latest_per_area(db).items()}
     start = min((latest.get(name, FIRST_DAY - timedelta(days=1)) for name in LOCATIONS),
                 default=FIRST_DAY - timedelta(days=1)) + timedelta(days=1)
     end = date.today()
@@ -76,6 +77,12 @@ async def update(db: Session) -> int:
                 continue
             rows.append({"location": name, "day": day, **values})
     if rows:
+        first_new: dict[str, date] = {}
+        for r in rows:
+            first_new[r["location"]] = min(r["day"], first_new.get(r["location"], r["day"]))
+        for name, day in first_new.items():
+            db.query(WeatherHistory).filter(WeatherHistory.location == name,
+                                            WeatherHistory.day >= day).delete()
         db.execute(insert(WeatherHistory), rows)
     db.commit()
     added = len(rows)

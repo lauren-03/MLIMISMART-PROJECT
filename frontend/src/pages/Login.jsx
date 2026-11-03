@@ -38,9 +38,7 @@ export default function Login() {
             <div className="auth-card p-4 p-md-5">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h1 className="h4 text-tea mb-0">{t('loginTitle')}</h1>
-                <div className="bg-dark rounded p-1">
-                  <LanguageSelector compact />
-                </div>
+                <LanguageSelector compact />
               </div>
 
               <ErrorBox error={error} />

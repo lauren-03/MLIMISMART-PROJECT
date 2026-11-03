@@ -27,7 +27,6 @@ export default function RainPredictionCard({ location }) {
 
   const day = new Date(prediction.target_day).toLocaleDateString(
     language === 'NY' ? 'ny-MW' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'short' })
-  const metrics = data.model?.metrics
 
   return (
     <div className="card card-mlimi mb-3">
@@ -37,13 +36,7 @@ export default function RainPredictionCard({ location }) {
           <span className="display-6 fw-semibold">{pct(prediction.probability)}</span>
           <span className="text-muted">{t('rainChanceOn')} {day}</span>
         </div>
-        <p className="mb-2">{prediction.will_rain ? t('rainExpected') : t('rainNotExpected')}</p>
-        {metrics && (
-          <p className="small text-muted mb-0">
-            {t('rainModelVersion')} {prediction.model_version} · {t('testedAccuracy')} {pct(metrics.accuracy)}
-            {data.live?.checked > 0 && ` · ${t('liveAccuracy')} ${pct(data.live.accuracy)} (${data.live.checked})`}
-          </p>
-        )}
+        <p className="mb-0">{prediction.will_rain ? t('rainExpected') : t('rainNotExpected')}</p>
       </div>
     </div>
   )

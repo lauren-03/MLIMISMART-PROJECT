@@ -37,20 +37,7 @@ const CONTENT = {
     ],
     reachNote: 'All three give the same advice, because they all use the same system.',
     whereTitle: 'Where MlimiSmart works',
-    sourcesTitle: 'Where the information comes from',
-    sources: [
-      'Weather comes from Open-Meteo, a weather forecasting service, and is checked for each area separately.',
-      'The models also learn from three public climate datasets for every area since 2016: ERA5-Land soil moisture, NASA POWER rainfall, sunshine and soil wetness, and CHIRPS monthly rainfall.',
-      'The tea farming advice comes from established good practice for tea in southern Malawi, kept up to date by the MlimiSmart administrator.',
-      'Google Gemini, an artificial intelligence service, is used to word the advice clearly. The decision itself comes from MlimiSmart\'s own trained models.',
-    ],
     caution: 'MlimiSmart is a guide, not a replacement for your extension officer. Before using any chemical, or if a problem is spreading, ask your extension officer.',
-    privacyTitle: 'Your information',
-    privacy: [
-      'Your phone number, area, language and farm records are used only to give you advice.',
-      'Your password is stored in a scrambled form that cannot be read back, not even by the administrator.',
-      'Your information is not sold or shared with anyone.',
-    ],
     cta: 'Create your account',
     ctaUssd: 'Try the USSD menu',
   },
@@ -85,20 +72,7 @@ const CONTENT = {
     ],
     reachNote: 'Njira zonse zitatu zimapereka uphungu womwewo, chifukwa zonse zimagwiritsa ntchito makina amodzi.',
     whereTitle: 'Kumene MlimiSmart amagwira ntchito',
-    sourcesTitle: 'Kumene nkhani zimachokera',
-    sources: [
-      'Nyengo imachokera ku Open-Meteo, utumiki woneneratu nyengo, ndipo imayang\'aniridwa dera lililonse padera.',
-      'Ma model amaphunziranso kuchokera ku deta itatu ya nyengo ya dera lililonse kuyambira 2016: chinyezi cha nthaka cha ERA5-Land, mvula, dzuwa ndi chinyezi cha nthaka cha NASA POWER, ndi mvula ya mwezi uliwonse ya CHIRPS.',
-      'Uphungu wa ulimi wa tiyi umachokera ku njira zabwino zodziwika za tiyi kum\'mwera kwa Malawi, zomwe woyang\'anira MlimiSmart amazisunga zatsopano.',
-      'Google Gemini, utumiki wa nzeru zochita kupanga (AI), umagwiritsidwa ntchito kulemba uphungu momveka bwino. Chisankho chimachokera ku ma model a MlimiSmart omwe.',
-    ],
     caution: 'MlimiSmart ndi chitsogozo, osati m\'malo mwa alangizi a zaulimi. Musanagwiritse ntchito mankhwala aliwonse, kapena ngati vuto likufalikira, funsani alangizi a zaulimi.',
-    privacyTitle: 'Zambiri zanu',
-    privacy: [
-      'Nambala yanu ya foni, dera, chilankhulo ndi zolemba za munda zimagwiritsidwa ntchito kokha kukupatsani uphungu.',
-      'Achinsinsi anu amasungidwa mosokonezedwa moti sangawerengedwenso, ngakhale ndi woyang\'anira.',
-      'Zambiri zanu sizigulitsidwa kapena kugawidwa kwa wina aliyense.',
-    ],
     cta: 'Pangani akaunti yanu',
     ctaUssd: 'Yesani menyu ya USSD',
   },
@@ -172,21 +146,7 @@ export default function About() {
           </div>
         </section>
 
-        <section className="row g-5 mb-4">
-          <div className="col-lg-6">
-            <h2 className="section-title h3">{c.sourcesTitle}</h2>
-            <ul className="about-bullets">
-              {c.sources.map((s) => <li key={s}>{s}</li>)}
-            </ul>
-            <p className="about-caution">{c.caution}</p>
-          </div>
-          <div className="col-lg-6">
-            <h2 className="section-title h3">{c.privacyTitle}</h2>
-            <ul className="about-bullets">
-              {c.privacy.map((s) => <li key={s}>{s}</li>)}
-            </ul>
-          </div>
-        </section>
+        <p className="about-caution mb-4">{c.caution}</p>
 
         <div className="d-flex gap-2 flex-wrap">
           {!farmer && <Link to="/register" className="btn btn-tea btn-lg">{c.cta}</Link>}

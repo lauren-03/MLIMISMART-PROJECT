@@ -8,7 +8,7 @@ from ..models import (
     AdviceRequest, AdviceResponse, Channel, KnowledgeItem, Language, WeatherRecord,
 )
 from ..ml import advice_model, rain_model
-from . import advisory_engine, llm_service, weather_service
+from . import advisory_engine, llm_service, speech_service, weather_service
 from .intent_model import classifier
 
 log = logging.getLogger(__name__)
@@ -90,6 +90,9 @@ async def answer(
         "model_version": decision["version"] if decision else None,
         "request_id": None,
     }
+
+    if channel == "WEB":
+        speech_service.prepare(text, language)
 
     if persist:
         result["request_id"] = _persist(

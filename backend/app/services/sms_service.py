@@ -21,11 +21,69 @@ SMS_LIMIT = 320
 LONG_SMS_LIMIT = 459
 
 
-async def send_sms(db: Session, phone: str, message: str, *, limit: int = SMS_LIMIT) -> dict:
-    """Send (or simulate) an outgoing SMS and log it."""
-    message = _trim(message, limit)
+def gateway() -> str:
+    """The SMS gateway in use: "android", "africastalking" or "simulator"."""
+    mode = settings.sms_gateway.lower()
+    if mode == "android" and settings.android_sms_url:
+        return "android"
+    if (mode == "africastalking" or settings.sms_enabled) and settings.at_api_key:
+        return "africastalking"
+    return "simulator"
 
-    if not settings.sms_enabled or not settings.at_api_key:
+
+def _android_auth() -> tuple[str, str]:
+    return settings.android_sms_username, settings.android_sms_password
+
+
+async def _send_android(phone: str, message: str) -> str:
+    """Send through the phone running SMS Gateway for Android (Local Server)."""
+    url = settings.android_sms_url.rstrip("/") + "/message"
+    body = {"textMessage": {"text": message}, "phoneNumbers": [_to_e164(phone)]}
+    try:
+        async with httpx.AsyncClient(timeout=20.0, auth=_android_auth()) as client:
+            response = await client.post(url, json=body)
+            response.raise_for_status()
+        return "ok"
+    except Exception as exc:  # noqa: BLE001 - log the failure, keep the record
+        log.error("Android SMS gateway send failed for %s: %s", phone, exc)
+        return "failed"
+
+
+async def register_android_webhook(public_url: str) -> bool:
+    """Ask the phone to forward every received SMS to this API."""
+    if gateway() != "android" or not public_url:
+        return False
+    base = settings.android_sms_url.rstrip("/")
+    target = public_url.rstrip("/") + "/api/sms/android"
+    try:
+        async with httpx.AsyncClient(timeout=15.0, auth=_android_auth()) as client:
+            existing = (await client.get(base + "/webhooks")).json() or []
+            for hook in existing:
+                if hook.get("event") == "sms:received" and hook.get("url") != target:
+                    await client.delete(f"{base}/webhooks/{hook['id']}")
+            if not any(h.get("url") == target for h in existing):
+                response = await client.post(base + "/webhooks", json={
+                    "id": "mlimismart-sms", "url": target, "event": "sms:received"})
+                response.raise_for_status()
+        log.info("Android SMS gateway will forward received SMS to %s", target)
+        return True
+    except Exception as exc:  # noqa: BLE001
+        log.error("Could not register the webhook on the Android phone: %s", exc)
+        return False
+
+
+async def send_sms(db: Session, phone: str, message: str, *, limit: int = SMS_LIMIT) -> dict:
+    """Send an outgoing SMS through the active gateway and log it."""
+    message = _trim(message, limit)
+    mode = gateway()
+
+    if mode == "android":
+        status = await _send_android(phone, message)
+        db.add(SmsLog(phone=phone, direction="OUT", message=message, gateway="android", status=status))
+        db.commit()
+        return {"gateway": "android", "status": status, "message": message}
+
+    if mode == "simulator":
         entry = SmsLog(phone=phone, direction="OUT", message=message,
                        gateway="simulator", status="ok")
         db.add(entry)
@@ -64,10 +122,9 @@ async def send_sms(db: Session, phone: str, message: str, *, limit: int = SMS_LI
     return {"gateway": "africastalking", "status": status, "message": message}
 
 
-def log_incoming(db: Session, phone: str, message: str) -> None:
-    gateway = "africastalking" if settings.sms_enabled else "simulator"
+def log_incoming(db: Session, phone: str, message: str, source: str | None = None) -> None:
     db.add(SmsLog(phone=phone, direction="IN", message=message,
-                  gateway=gateway, status="ok"))
+                  gateway=source or gateway(), status="ok"))
     db.commit()
 
 
@@ -146,9 +203,12 @@ def _to_e164(phone: str) -> str:
 
 
 def status() -> dict:
+    mode = gateway()
     return {
-        "mode": "africastalking" if (settings.sms_enabled and settings.at_api_key) else "simulator",
-        "gateway": "Africa's Talking",
-        "username": settings.at_username if settings.sms_enabled else None,
-        "configured": bool(settings.at_api_key),
+        "mode": mode,
+        "gateway": {"android": "SMS Gateway for Android", "africastalking": "Africa's Talking",
+                    "simulator": "Simulator"}[mode],
+        "number": settings.sms_number or None,
+        "username": settings.at_username if mode == "africastalking" else None,
+        "configured": mode != "simulator",
     }

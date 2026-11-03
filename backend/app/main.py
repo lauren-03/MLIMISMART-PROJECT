@@ -8,8 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .database import active_database_url, init_db
 from .ml import learning
+from .services import sms_service, speech_service, tunnel
 from .routers import (
-    admin, advisory, auth, db_browser, farm, models_admin, sms, ussd, weather,
+    admin, advisory, auth, db_browser, farm, models_admin, sms, speech, ussd, weather,
 )
 from .services.intent_model import classifier
 
@@ -28,9 +29,21 @@ async def lifespan(app: FastAPI):
     log.info("Database ready: %s", active_database_url.split("@")[-1])
     classifier.train()
     cycle = asyncio.create_task(learning.run_forever())
+    gateways = asyncio.create_task(_connect_gateways())
+    speech_service.warm_up()
     log.info("MlimiSmart API is ready")
     yield
     cycle.cancel()
+    gateways.cancel()
+    await tunnel.stop()
+
+
+async def _connect_gateways() -> None:
+    """Open the public address and tell the SMS phone where to forward texts."""
+    url = await tunnel.start()
+    if url:
+        log.info("USSD callback for Africa's Talking: %s/api/ussd", url)
+        await sms_service.register_android_webhook(url)
 
 
 app = FastAPI(
@@ -66,6 +79,7 @@ app.include_router(farm.router)
 app.include_router(admin.router)
 app.include_router(db_browser.router)
 app.include_router(models_admin.router)
+app.include_router(speech.router)
 
 
 @app.get("/", tags=["health"])

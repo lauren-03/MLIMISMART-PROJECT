@@ -15,8 +15,8 @@ import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import Profile from './pages/Profile'
 import Register from './pages/Register'
-import SmsSimulator from './pages/SmsSimulator'
-import UssdSimulator from './pages/UssdSimulator'
+import SmsPage from './pages/SmsPage'
+import UssdPage from './pages/UssdPage'
 import Weather from './pages/Weather'
 
 // The map (Leaflet) and the chart pages (Recharts) are the heaviest code, so
@@ -53,8 +53,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/sms" element={<SmsSimulator />} />
-            <Route path="/ussd" element={<UssdSimulator />} />
+            <Route path="/sms" element={<SmsPage />} />
+            <Route path="/ussd" element={<UssdPage />} />
             <Route path="/map" element={<AreasMap />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/about" element={<About />} />

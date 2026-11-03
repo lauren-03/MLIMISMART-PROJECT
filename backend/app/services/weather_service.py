@@ -1,8 +1,8 @@
-"""Weather data from Open-Meteo."""
+"""Weather data from Open-Meteo, with MET Norway as a backup."""
 import copy
 import logging
 import time
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import httpx
 
@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 # the free API.
 CACHE_SECONDS = 600
 _cache: dict[str, tuple[float, dict]] = {}
+_last_good: dict[str, dict] = {}
 
 BASE_URL = "https://api.open-meteo.com/v1/forecast"
 TIMEZONE = "Africa/Blantyre"
@@ -64,17 +65,30 @@ async def fetch_weather(location: str | None) -> dict:
         "timezone": TIMEZONE,
         "forecast_days": 5,
     }
+    shaped = None
     try:
         async with httpx.AsyncClient(timeout=12.0) as client:
             response = await client.get(BASE_URL, params=params)
             response.raise_for_status()
             payload = response.json()
         shaped = _shape(name, place, payload)
-        _cache[name] = (time.monotonic(), shaped)
-        return copy.deepcopy(shaped)
-    except Exception as exc:  # noqa: BLE001 - network/API failure must not break advice
+    except Exception as exc:  # noqa: BLE001 - try the backup service next
         log.warning("Open-Meteo request failed for %s: %s", name, exc)
-        return _offline(name, place)
+        try:
+            shaped = await _met_norway(name, place)
+        except Exception as exc2:  # noqa: BLE001
+            log.warning("MET Norway request failed for %s: %s", name, exc2)
+
+    if shaped:
+        _cache[name] = (time.monotonic(), shaped)
+        _last_good[name] = shaped
+        return copy.deepcopy(shaped)
+    if name in _last_good:
+        # Both services are down: show the last reading, marked as old.
+        stale = copy.deepcopy(_last_good[name])
+        stale["stale"] = True
+        return stale
+    return _offline(name, place)
 
 
 async def fetch_many() -> list[dict]:
@@ -115,9 +129,21 @@ async def fetch_many() -> list[dict]:
                 "temp_min": (daily.get("temperature_2m_min") or [None])[0],
             }))
         _cache["__all__"] = (time.monotonic(), {"areas": areas})
-    except Exception as exc:  # noqa: BLE001 - the map still shows the areas
+    except Exception as exc:  # noqa: BLE001 - fall back to one reading per area
         log.warning("Open-Meteo multi-area request failed: %s", exc)
-        areas = [_area_row(name, None) for name in names]
+        areas = []
+        for name in names:
+            w = await fetch_weather(name)
+            if w["offline"]:
+                areas.append(_area_row(name, None))
+                continue
+            today = (w["forecast"] or [{}])[0]
+            c = w["current"]
+            areas.append(_area_row(name, {
+                "temperature": c["temperature"], "humidity": c["humidity"], "code": c["code"],
+                "rain_probability": c["rain_probability"],
+                "temp_max": today.get("temp_max"), "temp_min": today.get("temp_min"),
+            }))
     return copy.deepcopy(areas)
 
 
@@ -168,6 +194,7 @@ def _shape(name: str, place: dict, payload: dict) -> dict:
         "latitude": place["lat"],
         "longitude": place["lon"],
         "offline": False,
+        "source": "Open-Meteo",
         "observed_at": datetime.now(timezone.utc).isoformat(),
         "current": {
             "temperature": current.get("temperature_2m"),
@@ -180,6 +207,103 @@ def _shape(name: str, place: dict, payload: dict) -> dict:
             # Today's max probability is the figure the rule engine uses.
             "rain_probability": day("precipitation_probability_max", 0),
             "rain_today_mm": day("precipitation_sum", 0),
+        },
+        "forecast": forecast,
+    }
+
+
+MET_URL = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
+MET_HEADERS = {"User-Agent": "MlimiSmart/1.0 (student project, github.com/lauren-03)"}
+LOCAL_OFFSET = timedelta(hours=2)  # Malawi time, UTC+2
+
+# MET Norway symbol names mapped to the WMO codes the rest of the system uses.
+MET_SYMBOLS = {
+    "clearsky": 0, "fair": 1, "partlycloudy": 2, "cloudy": 3, "fog": 45,
+    "lightrain": 61, "rain": 63, "heavyrain": 65,
+    "lightrainshowers": 80, "rainshowers": 80, "heavyrainshowers": 81,
+    "lightsleet": 61, "sleet": 63, "heavysleet": 65,
+}
+
+
+def _met_code(symbol):
+    if not symbol:
+        return None
+    base = symbol.split("_")[0]
+    if "thunder" in base:
+        return 95
+    return MET_SYMBOLS.get(base, 3)
+
+
+async def _met_norway(name: str, place: dict) -> dict:
+    """Backup forecast from MET Norway, shaped like an Open-Meteo reading.
+
+    MET Norway gives the expected amount of rain but no percentage chance,
+    so rain_probability is left empty rather than guessed.
+    """
+    async with httpx.AsyncClient(timeout=15.0, headers=MET_HEADERS) as client:
+        response = await client.get(MET_URL, params={"lat": round(place["lat"], 4),
+                                                     "lon": round(place["lon"], 4)})
+        response.raise_for_status()
+        series = response.json()["properties"]["timeseries"]
+
+    days = {}
+    for entry in series:
+        when = datetime.fromisoformat(entry["time"].replace("Z", "+00:00")) + LOCAL_OFFSET
+        key = when.date().isoformat()
+        data = entry["data"]
+        details = data["instant"]["details"]
+        d = days.setdefault(key, {"temps": [], "rain": 0.0, "wind": 0.0, "symbols": []})
+        d["temps"].append(details.get("air_temperature"))
+        d["wind"] = max(d["wind"], (details.get("wind_speed") or 0) * 3.6)
+        if "next_1_hours" in data:
+            d["rain"] += data["next_1_hours"]["details"].get("precipitation_amount", 0)
+            if 9 <= when.hour <= 17:
+                d["symbols"].append(data["next_1_hours"]["summary"]["symbol_code"])
+        elif "next_6_hours" in data:
+            d["rain"] += data["next_6_hours"]["details"].get("precipitation_amount", 0)
+            d["symbols"].append(data["next_6_hours"]["summary"]["symbol_code"])
+
+    forecast = []
+    for key in sorted(days)[:5]:
+        d = days[key]
+        temps = [t for t in d["temps"] if t is not None]
+        codes = [c for c in (_met_code(x) for x in d["symbols"]) if c is not None]
+        code = max(codes) if codes else None   # the wettest weather of the day
+        forecast.append({
+            "date": key,
+            "weekday": _weekday(key),
+            "code": code,
+            "condition_en": describe_code(code, "EN"),
+            "condition_ny": describe_code(code, "NY"),
+            "temp_max": round(max(temps), 1) if temps else None,
+            "temp_min": round(min(temps), 1) if temps else None,
+            "rain_mm": round(d["rain"], 1),
+            "rain_probability": None,
+            "wind_kph": round(d["wind"], 1),
+        })
+
+    now = series[0]["data"]
+    details = now["instant"]["details"]
+    nxt = now.get("next_1_hours") or now.get("next_6_hours") or {}
+    code = _met_code(nxt.get("summary", {}).get("symbol_code"))
+    return {
+        "location": name,
+        "district": place["district"],
+        "latitude": place["lat"],
+        "longitude": place["lon"],
+        "offline": False,
+        "source": "MET Norway",
+        "observed_at": datetime.now(timezone.utc).isoformat(),
+        "current": {
+            "temperature": details.get("air_temperature"),
+            "humidity": details.get("relative_humidity"),
+            "rain_mm": nxt.get("details", {}).get("precipitation_amount"),
+            "wind_kph": round((details.get("wind_speed") or 0) * 3.6, 1),
+            "code": code,
+            "condition_en": describe_code(code, "EN"),
+            "condition_ny": describe_code(code, "NY"),
+            "rain_probability": None,
+            "rain_today_mm": forecast[0]["rain_mm"] if forecast else None,
         },
         "forecast": forecast,
     }
@@ -219,6 +343,11 @@ def summarise(weather: dict, language: str = "EN") -> str:
     condition = current["condition_ny"] if language == "NY" else current["condition_en"]
     temp = current["temperature"]
     probability = current["rain_probability"]
+    if probability is None:
+        mm = current.get("rain_today_mm") or 0
+        if language == "NY":
+            return f"{condition}, {temp}C, mvula lero {mm} mm"
+        return f"{condition}, {temp}C, rain today {mm} mm"
     if language == "NY":
         return f"{condition}, {temp}C, mwayi wa mvula {probability}%"
     return f"{condition}, {temp}C, rain chance {probability}%"

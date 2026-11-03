@@ -144,6 +144,8 @@ def probability_for(db: Session, location: str) -> dict | None:
     clim = climate.load(db, location=name, since=date.today() - timedelta(days=90))
     prob = float(model.predict_proba([features(rows, len(rows) - 1, place, clim, name)])[0, 1])
     target = rows[-1].day + timedelta(days=1)
+    if target < date.today():
+        return None  # weather history is behind; no prediction for a past day
     _remember(db, name, target, prob, version)
     return {"location": name, "target_day": target.isoformat(), "probability": round(prob, 3),
             "will_rain": prob >= 0.5, "model_version": version}
