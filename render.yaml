@@ -1,0 +1,28 @@
+# Render blueprint: one free web service built from the Dockerfile.
+services:
+  - type: web
+    name: mlimismart
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: AT_API_KEY
+        sync: false
+      - key: AT_USERNAME
+        value: sandbox
+      - key: AT_SENDER_ID
+        value: "12253"
+      - key: USSD_CODE
+        value: "*384*36247#"
+      - key: SMS_GATEWAY
+        value: africastalking
+      - key: PRELOAD_VOICES
+        value: "false"

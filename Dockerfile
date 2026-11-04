@@ -1,4 +1,4 @@
-# MlimiSmart: website and API in one container (Hugging Face Spaces, port 7860).
+# MlimiSmart: website and API in one container (Render, or any Docker host).
 
 # 1. Build the React website
 FROM node:22-slim AS website
@@ -15,9 +15,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 RUN useradd -m -u 1000 user
 WORKDIR /app
 
-COPY backend/requirements.txt backend/requirements.txt
-RUN pip install --no-cache-dir torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir -r backend/requirements.txt
+COPY backend/requirements.txt backend/requirements-english-voice.txt backend/
+RUN pip install --no-cache-dir -r backend/requirements.txt
+# The English voice needs about 1 GB of memory; leave it out on small servers.
+ARG ENGLISH_VOICE=false
+RUN if [ "$ENGLISH_VOICE" = "true" ]; then \
+      pip install --no-cache-dir torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu \
+      && pip install --no-cache-dir -r backend/requirements-english-voice.txt; fi
 
 COPY backend/ backend/
 COPY --from=website /web/dist frontend/dist

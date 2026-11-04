@@ -43,6 +43,7 @@ Results and training history are shown under Admin > AI models.
    cd backend
    python -m venv .venv
    .venv\Scripts\pip install -r requirements.txt
+   .venv\Scripts\pip install -r requirements-english-voice.txt   (optional English voice)
    copy .env.example .env
    .venv\Scripts\python create_database.py
    .venv\Scripts\python seed.py

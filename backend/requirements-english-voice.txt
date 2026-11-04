@@ -1,0 +1,4 @@
+# Optional English voice for Listen (Meta MMS). Install the CPU build of torch first:
+#   pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+torch==2.15.0
+transformers==4.57.6

@@ -48,6 +48,7 @@ class Settings(BaseSettings):
 
     # Chichewa voice for "Listen": "kasanoma" (fast Piper voice) or "mms" (Meta)
     chichewa_voice: str = "kasanoma"
+    preload_voices: bool = True        # false on small hosting servers
 
     # Seeded admin
     admin_phone: str = "0999000000"

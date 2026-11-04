@@ -153,6 +153,8 @@ def _key(text: str, language: str) -> str:
 
 def warm_up() -> None:
     """Load both voices in the background when the API starts."""
+    if not settings.preload_voices:
+        return  # small servers: voices load on first use instead
     # Even the import checks are slow, so all of it runs off the start-up path.
     _worker.submit(_warm)
 
