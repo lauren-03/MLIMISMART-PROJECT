@@ -1,0 +1,11 @@
+.git
+node_modules
+**/node_modules
+**/__pycache__
+frontend/dist
+backend/.venv
+backend/.env
+backend/ml_store
+backend/tools
+backend/voices
+backend/mlimismart.db

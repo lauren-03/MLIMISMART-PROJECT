@@ -1,3 +1,12 @@
+---
+title: MlimiSmart
+colorFrom: green
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # MlimiSmart
 
 Tea farming advisory system for smallholder farmers in Thyolo and Mulanje.

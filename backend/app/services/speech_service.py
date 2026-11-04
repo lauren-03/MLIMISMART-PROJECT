@@ -153,12 +153,20 @@ def _key(text: str, language: str) -> str:
 
 def warm_up() -> None:
     """Load both voices in the background when the API starts."""
-    if _use_kasanoma("NY"):
-        _worker.submit(_piper)
-    if _has_mms():
-        for language in MODELS:
-            if not _use_kasanoma(language):
-                _worker.submit(_model, language)
+    # Even the import checks are slow, so all of it runs off the start-up path.
+    _worker.submit(_warm)
+
+
+def _warm() -> None:
+    try:
+        if _use_kasanoma("NY"):
+            _piper()
+        if _has_mms():
+            for language in MODELS:
+                if not _use_kasanoma(language):
+                    _model(language)
+    except Exception:  # noqa: BLE001 - voices load again on first use
+        log.exception("Could not preload the voices")
 
 
 def prepare(text: str, language: str) -> None:

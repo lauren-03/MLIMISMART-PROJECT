@@ -1,5 +1,6 @@
 """Public HTTPS address for the SMS and USSD gateways (Cloudflare quick tunnel)."""
 import asyncio
+import os
 import logging
 import re
 import shutil
@@ -17,8 +18,10 @@ _url: str = ""
 
 
 def public_url() -> str:
-    """The address gateways should call: the .env value, or the tunnel's."""
-    return (settings.public_url or _url).rstrip("/")
+    """The address gateways should call: the .env value, the hosting
+    platform's own address (Hugging Face sets SPACE_HOST), or the tunnel's."""
+    space = os.environ.get("SPACE_HOST")
+    return (settings.public_url or (f"https://{space}" if space else "") or _url).rstrip("/")
 
 
 def _binary() -> str | None:

@@ -2,8 +2,10 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import active_database_url, init_db
@@ -82,7 +84,7 @@ app.include_router(models_admin.router)
 app.include_router(speech.router)
 
 
-@app.get("/", tags=["health"])
+@app.get("/api", tags=["health"])
 def root():
     return {
         "system": "MlimiSmart",
@@ -105,3 +107,19 @@ def health():
         "database": "mysql" if active_database_url.startswith("mysql") else "sqlite",
         "classifier_trained": classifier.pipeline is not None,
     }
+
+
+# Online, the built website is served by the API itself, so the site and the
+# API share one address. Locally the Vite dev server is used instead.
+WEBSITE = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+
+if WEBSITE.is_dir():
+    @app.get("/{path:path}", include_in_schema=False)
+    def website(path: str):
+        if path.startswith("api/") or path == "api":
+            raise HTTPException(status_code=404)
+        file = (WEBSITE / path).resolve()
+        if path and file.is_file() and WEBSITE in file.parents:
+            return FileResponse(file)
+        return FileResponse(WEBSITE / "index.html")
+
