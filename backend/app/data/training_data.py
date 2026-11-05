@@ -32,11 +32,15 @@ TRAINING_DATA: list[tuple[str, str]] = [
     ("my plucking cycle is late what do i do", "plucking"),
     ("two leaves and a bud", "plucking"),
     ("is my leaf too coarse", "plucking"),
-    ("Ndisende tiyi liti", "plucking"),
+    ("Ndithyole tiyi liti", "plucking"),
+    ("kuthyola", "plucking"),
+    ("Ndithyola masamba angati", "plucking"),
+    ("Kodi ndingathyole mvula ikugwa", "plucking"),
+    ("Nyengo ya kuthyola ndi masiku angati", "plucking"),
+    ("Kodi ndithyole tiyi lero", "plucking"),
+    ("Ndikuthyola masamba awiri ndi mphukira", "plucking"),
     ("kusenda", "plucking"),
-    ("Ndisenda masamba angati", "plucking"),
-    ("Kodi ndingasende mvula ikugwa", "plucking"),
-    ("Nyengo ya kusenda ndi masiku angati", "plucking"),
+    ("Ndisende tiyi liti", "plucking"),
     ("masamba awiri ndi phukusi", "plucking"),
 
     # ---------------- pruning ----------------
@@ -149,6 +153,9 @@ KEYWORDS: dict[str, str] = {
     "help": "general", "info": "general", "start": "general",
     # Chichewa
     "fetereza": "fertilizer", "manyowa": "fertilizer",
+    # kuthyola is the word Malawian tea farmers use. kusenda is kept as an
+    # alias so anyone who still types the older word is understood.
+    "kuthyola": "plucking", "thyolani": "plucking",
     "kusenda": "plucking", "sendani": "plucking",
     "kutema": "pruning", "temani": "pruning",
     "tizilombo": "pest_disease", "matenda": "pest_disease", "kangaude": "pest_disease",

@@ -32,7 +32,7 @@ easily. Short sentences.
 markdown, no bullet points, no emoji.
 - At most {max_sentences} sentences.
 - If writing Chichewa, use natural farming vocabulary as used in Malawi \
-(kuthira fetereza, kusenda, kutema, mphukira). Never mix in English words that \
+(kuthira fetereza, kuthyola, kutema, mphukira). Never mix in English words that \
 have a common Chichewa equivalent.
 """
 

@@ -33,7 +33,7 @@ KNOWLEDGE_SEED: list[dict] = [
         "topic": "plucking",
         "season": "all",
         "title_en": "Plucking cycle and leaf standard",
-        "title_ny": "Nyengo ya kusenda ndi mtundu wa masamba",
+        "title_ny": "Nyengo ya kuthyola ndi mtundu wa masamba",
         "body_en": (
             "Keep to a 10 to 11 day plucking round. Pluck two leaves and a bud only. "
             "Plucking coarse leaf, or going beyond the round, lowers the grade the "
@@ -41,8 +41,8 @@ KNOWLEDGE_SEED: list[dict] = [
             "deliver to the buying centre the same day so the leaf does not heat up."
         ),
         "body_ny": (
-            "Sungani nyengo ya kusenda ya masiku 10 mpaka 11. Sendani masamba awiri "
-            "ndi phukusi lokha. Kusenda masamba akuluakulu kapena kuchedwa kupitirira "
+            "Sungani nyengo ya kuthyola ya masiku 10 mpaka 11. Thyolani masamba awiri "
+            "ndi phukusi lokha. Kuthyola masamba akuluakulu kapena kuchedwa kupitirira "
             "nyengo kumachepetsa mtengo umene fakitale imalipira. Osathina masamba "
             "onyowa mu dengu, ndipo tengerani ku malo ogulira tsiku lomwelo kuti "
             "masamba asatenthe."
@@ -66,7 +66,7 @@ KNOWLEDGE_SEED: list[dict] = [
             "kutentha kwambiri. Gwiritsani ntchito nkhwangwa kapena mpeni wakuthwa "
             "ndi waukhondo, ndipo dulani mozondoka kuti madzi asatsalire. Mukatema, "
             "lekani chitsamba chichire ndipo konzani pamwamba pa msinkhu woyenera "
-            "chisanabwerere ku kusenda."
+            "chisanabwerere ku kuthyola."
         ),
     },
     {
@@ -104,11 +104,11 @@ KNOWLEDGE_SEED: list[dict] = [
             "can be slightly longer."
         ),
         "body_ny": (
-            "Konzekerani kusenda kuti masamba akafike ku malo ogulira tsiku lomwelo "
-            "limene mwawasenda. Sungani madengu pa mthunzi mukamagwira ntchito, osati "
+            "Konzekerani kuthyola kuti masamba akafike ku malo ogulira tsiku lomwelo "
+            "limene mwawathyola. Sungani madengu pa mthunzi mukamagwira ntchito, osati "
             "pa dzuwa kapena m'matumba otsekedwa. Tiyi amachuluka m'nyengo ya mvula, "
             "choncho konzani antchito nthawi isanakwane; m'nyengo youma masamba "
-            "amachepa ndipo nyengo ya kusenda ingatalikire pang'ono."
+            "amachepa ndipo nyengo ya kuthyola ingatalikire pang'ono."
         ),
     },
     {
@@ -190,7 +190,7 @@ MESSAGES: dict[str, dict[str, str]] = {
             "your question again in a few words."
         ),
         "NY": (
-            "Ndingakuthandize pa fetereza, kusenda, kutema, tizilombo ndi matenda, "
+            "Ndingakuthandize pa fetereza, kuthyola, kutema, tizilombo ndi matenda, "
             "kokolola ndi nyengo. Tumizani limodzi la mawu amenewa, kapena "
             "funsani funso lanu mwachidule."
         ),
@@ -203,7 +203,7 @@ MESSAGES: dict[str, dict[str, str]] = {
             "LANG NY = Chichewa."
         ),
         "NY": (
-            "MlimiSmart: tumizani FETEREZA, KUSENDA, KUTEMA, TIZILOMBO, KOKOLOLA "
+            "MlimiSmart: tumizani FETEREZA, KUTHYOLA, KUTEMA, TIZILOMBO, KOKOLOLA "
             "kapena NYENGO, kapena funsani funso. KALENDALA = ntchito za mwezi uno. "
             "CHENJEZO INDE = machenjezo a nyengo. DERA Luchenza = dera lanu. "
             "LANG EN = Chingerezi."

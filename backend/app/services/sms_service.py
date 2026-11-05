@@ -175,7 +175,7 @@ def detect_language(text: str) -> str | None:
     words = set(re.findall(r"\w+", (text or "").lower()))
     chichewa_markers = {
         "kodi", "ndi", "ndingathire", "fetereza", "mvula", "nyengo", "liti",
-        "bwanji", "kusenda", "kutema", "tizilombo", "masamba", "tiyi", "moni",
+        "bwanji", "kuthyola", "kutema", "tizilombo", "masamba", "tiyi", "moni",
         "ndiike", "lero", "mawa", "munda", "chiyani", "zikomo", "kokolola",
     }
     if words & chichewa_markers:

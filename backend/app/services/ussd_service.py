@@ -72,7 +72,7 @@ SCREENS = {
                "0. Back"),
         "NY": ("UPHUNGU WA TIYI\n"
                "1. Fetereza\n"
-               "2. Kusenda\n"
+               "2. Kuthyola\n"
                "3. Kutema\n"
                "4. Tizilombo\n"
                "5. Kokolola\n"

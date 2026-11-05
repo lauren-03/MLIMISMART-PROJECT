@@ -372,7 +372,7 @@ ALERT_TEXT = {
         "Rain likely {day}",
         "Mvula ikhoza kugwa {day}",
         "{p}% chance of rain. Plan plucking early in the day and keep fertilizer covered.",
-        "Mwayi wa mvula ndi {p}%. Senderani m'mawa ndipo phimbani fetereza.",
+        "Mwayi wa mvula ndi {p}%. Thyolani m'mawa ndipo phimbani fetereza.",
     ),
     "heat": (
         "Hot day {day}",

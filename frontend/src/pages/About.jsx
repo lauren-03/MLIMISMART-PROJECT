@@ -47,13 +47,13 @@ const CONTENT = {
     whyTitle: 'Chifukwa chake MlimiSmart alipo',
     why: [
       'Tiyi ndi imodzi mwa mbewu zofunika kwambiri ku Malawi, ndipo yambiri imalimidwa ku Thyolo ndi Mulanje ndi alimi ang\'onoang\'ono ambirimbiri.',
-      'Ulimi wabwino wa tiyi umadalira nthawi: nthawi yothira fetereza, yotema, ndi kangati kusenda. Nthawi yoyenera imasintha malinga ndi nyengo, ndipo nyengo ikukhala yovuta kuneneratu.',
+      'Ulimi wabwino wa tiyi umadalira nthawi: nthawi yothira fetereza, yotema, ndi kangati kuthyola. Nthawi yoyenera imasintha malinga ndi nyengo, ndipo nyengo ikukhala yovuta kuneneratu.',
       'Alangizi a zaulimi amagwira ntchito yofunika, koma ndi ochepa kuti afike pa munda uliwonse pamene chisankho chikufunika. MlimiSmart amapereka uphungu pa nthawi yake pakati pa maulendo awo.',
     ],
     doesTitle: 'Zomwe MlimiSmart amachita',
     does: [
       ['Nyengo ya dera lanu', 'Nyengo ya lero ndi masiku asanu akubwera m\'madera 23 a tiyi, pamodzi ndi machenjezo a mvula yamphamvu, kutentha, kuzizira ndi chilala.'],
-      ['Mayankho a mafunso anu', 'Funsani za fetereza, kusenda, kutema, tizilombo, kubzala kapena kukolola, ndipo mulandire uphungu woyenera dera lanu ndi nyengo ya lero.'],
+      ['Mayankho a mafunso anu', 'Funsani za fetereza, kuthyola, kutema, tizilombo, kubzala kapena kukolola, ndipo mulandire uphungu woyenera dera lanu ndi nyengo ya lero.'],
       ['Zolemba za munda', 'Kalendala ya tiyi ya mwezi uliwonse ndi kaundula wa zokolola amene amawerengera makilogalamu ndi ndalama zanu.'],
     ],
     howTitle: 'Momwe uphungu umapangidwira',
