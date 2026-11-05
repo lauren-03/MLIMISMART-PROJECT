@@ -111,6 +111,47 @@ def wording(topic: str, action: str, language: str) -> tuple[str, str]:
 DRY_SOIL = 0.22
 PLANTING_SOIL = 0.30
 
+# ---------------------------------------------------------------------------
+# Which months each operation belongs in, taken from the Tea Research
+# Association Planters' Calendar (TRA, 2023) and shifted six months.
+#
+# That calendar is written for Assam, where the monsoon runs June to
+# September. Malawi's rains run November to April, so an operation is placed
+# in the Malawian month at the same point in the growing year, not the same
+# month number. For example the TRA puts its main pruning in December to
+# February, which becomes June to August here.
+#
+# These windows are the month part of the labels the advice model learns
+# from, so the agronomy it reproduces is traceable to a published source
+# rather than to a guess.
+TRA_WINDOWS: dict[str, dict[str, tuple[int, ...]]] = {
+    # TRA: first dose of NPK with the early rains, second dose mid-season,
+    # nothing but foliar feed once the soil dries out.
+    "fertilizer": {
+        "main": (11, 12, 1, 2, 3),
+        "off": (5, 6, 7, 8),
+    },
+    # TRA: medium and light prune plus skiffing in the coldest, driest months,
+    # finished before the heat returns.
+    "pruning": {
+        "main": (6, 7, 8),
+    },
+    # TRA: main planting through the wet months, with a second, smaller
+    # window as the rains end ("autumn planting") for infilling.
+    "planting": {
+        # March is included because Malawi's rains run later than Assam's:
+        # the TRA finishes planting before its monsoon ends, and the
+        # equivalent point here is the end of March.
+        "main": (11, 12, 1, 2, 3),
+        "late": (4,),
+    },
+    # TRA: plucking rounds shorten through the wet months and lengthen as
+    # growth slows in the dry season.
+    "harvest": {
+        "lean": (6, 7, 8, 9, 10),
+    },
+}
+
 
 def expert_label(topic: str, f: dict) -> str:
     """The action tea agronomy guidance recommends for situation `f`.
@@ -129,7 +170,7 @@ def expert_label(topic: str, f: dict) -> str:
     m = f["month"]
 
     if topic == "fertilizer":
-        if m in (5, 6, 7, 8):
+        if m in TRA_WINDOWS["fertilizer"]["off"]:
             return "delay_off_season"
         if wet_soon or f["rain_today"] >= 15:
             return "delay_heavy_rain"
@@ -145,7 +186,7 @@ def expert_label(topic: str, f: dict) -> str:
             return "pluck_early_morning"
         return "pluck_normal"
     if topic == "pruning":
-        if m not in (6, 7, 8):
+        if m not in TRA_WINDOWS["pruning"]["main"]:
             return "delay_not_season"
         if f["rain_prob"] >= 0.6 or f["rain_today"] >= 5:
             return "delay_wet"
@@ -159,11 +200,12 @@ def expert_label(topic: str, f: dict) -> str:
     if topic == "harvest":
         if f["rain_prob"] >= 0.7:
             return "harvest_protect"
-        if m in (6, 7, 8, 9, 10) and dry_spell:
+        if m in TRA_WINDOWS["harvest"]["lean"] and dry_spell:
             return "harvest_low"
         return "harvest_normal"
     if topic == "planting":
-        if m not in (11, 12, 1, 2):
+        planting = TRA_WINDOWS["planting"]
+        if m not in planting["main"] + planting["late"]:
             return "plant_wait_season"
         too_dry = soil < PLANTING_SOIL if soil_known else f["rain_3d"] < 5
         if too_dry and f["rain_prob"] < 0.4:
