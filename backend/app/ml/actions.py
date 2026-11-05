@@ -160,7 +160,13 @@ def expert_label(topic: str, f: dict) -> str:
     model), rain_3d (mm over the last 3 days), tmax, humidity, wind, month and
     soil_moisture (ERA5-Land, m3/m3, may be missing).
     """
-    wet_soon = f["rain_prob"] >= 0.7 or f["rain_tomorrow"] >= 15
+    # The rain model gives a probability; the forecast gives millimetres.
+    # The model alone has been seen to predict rain above 0.8 on hot, clearly
+    # dry days, which produced a "heavy rain is expected" answer when the
+    # forecast was 0.2 mm and 33 C. A high probability is therefore only
+    # acted on when the forecast rainfall agrees that there is rain coming.
+    wet_soon = (f["rain_tomorrow"] >= 15
+                or (f["rain_prob"] >= 0.7 and f["rain_tomorrow"] >= 2))
     soil = f.get("soil_moisture")
     soil_known = soil is not None and soil == soil  # not missing / NaN
     if soil_known:

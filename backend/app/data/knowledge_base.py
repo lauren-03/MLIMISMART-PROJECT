@@ -17,14 +17,14 @@ KNOWLEDGE_SEED: list[dict] = [
         "body_en": (
             "Apply fertilizer when the soil is moist but not waterlogged. Split the "
             "yearly rate into two or three applications during the rainy season "
-            "(December to March). Broadcast it evenly in a band along the plucking "
+            "(November to March). Broadcast it evenly in a band along the plucking "
             "table edge, never against the stem. Avoid applying immediately before "
             "heavy rain, because the nutrients are washed away and the money is lost."
         ),
         "body_ny": (
             "Thirani fetereza pamene nthaka ili yonyowa koma osati yodzaza ndi madzi. "
             "Gawani fetereza wa chaka chonse maulendo awiri kapena atatu m'nyengo ya "
-            "mvula (Disembala mpaka Malichi). Mwazani mofanana m'mbali mwa mizere ya "
+            "mvula (Novembala mpaka Malichi). Mwazani mofanana m'mbali mwa mizere ya "
             "tiyi, osati pa tsinde. Pewani kuthira fetereza mvula yaikulu isanayambe, "
             "chifukwa mankhwala amakokoloka ndipo ndalama zimatayika."
         ),
