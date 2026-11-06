@@ -22,7 +22,7 @@ BODY_LIMIT = 130
 # mobile operator; *384*211# is the shape Africa's Talking issues on its
 # sandbox. The short code in the proposal (*211#) would be the production
 # equivalent applied for through Airtel or TNM.
-SERVICE_CODE = "*384*211#"
+SERVICE_CODE = "*384*36247#"
 
 
 # ---------------------------------------------------------------------------

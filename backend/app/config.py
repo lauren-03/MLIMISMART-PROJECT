@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     at_username: str = "sandbox"
     at_api_key: str = ""
     at_sender_id: str = ""
-    ussd_code: str = "*384*211#"
+    ussd_code: str = "*384*36247#"
 
     # Public HTTPS address for gateway callbacks. Leave empty to let the API
     # open a free Cloudflare quick tunnel when it starts.

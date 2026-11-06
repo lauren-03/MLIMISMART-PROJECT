@@ -125,7 +125,7 @@ export function Footer({ flush = false }) {
           <div className="col-6 col-lg-3">
             <h2>{t('navPhones')}</h2>
             <ul className="small">
-              <li><Link to="/ussd">USSD *384*211#</Link></li>
+              <li><Link to="/ussd">USSD *384*36247#</Link></li>
               <li><Link to="/sms">SMS</Link></li>
               <li><Link to="/map">{t('navMap')}</Link></li>
               <li><Link to="/about">{t('navAbout')}</Link></li>
