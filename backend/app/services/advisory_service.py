@@ -53,7 +53,8 @@ async def answer(
             question,
             language,
             location=weather["location"],
-            season=advisory_engine.season_label(advisory_engine.current_season(), "EN"),
+            season=advisory_engine.season_label(
+                advisory_engine.current_season(rain_3d=situation.get("rain_3d")), "EN"),
             weather_summary=summary if not weather["offline"] else "",
             knowledge=_knowledge_text(db),
             max_sentences=max_sentences + 1,
@@ -84,7 +85,7 @@ async def answer(
         "location": weather["location"],
         "weather_summary": summary,
         "weather": weather,
-        "season": advisory_engine.current_season(),
+        "season": advisory_engine.current_season(rain_3d=situation.get("rain_3d")),
         "action": advice.action,
         "rain_prediction": rain,
         "model_version": decision["version"] if decision else None,

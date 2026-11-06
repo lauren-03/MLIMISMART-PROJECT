@@ -218,9 +218,12 @@ def expert_label(topic: str, f: dict) -> str:
             return "plant_wait_moisture"
         return "plant_now"
     if topic == "weather":
-        if f["rain_tomorrow"] >= 15 or f["rain_prob"] >= 0.8:
+        # As with fertilizer: the model's probability is only acted on when
+        # the forecast millimetres agree. Without this the page announced
+        # "heavy rain is expected" on a 31 C day with 0.8 mm falling.
+        if f["rain_tomorrow"] >= 15 or (f["rain_prob"] >= 0.8 and f["rain_tomorrow"] >= 2):
             return "weather_heavy"
-        if f["rain_prob"] >= 0.5:
+        if f["rain_prob"] >= 0.5 and f["rain_tomorrow"] >= 1:
             return "weather_rain"
         return "weather_dry"
     if topic == "shade":

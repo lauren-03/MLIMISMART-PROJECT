@@ -36,10 +36,30 @@ class Advice:
         return " | ".join(self.rules_fired)
 
 
-def current_season(today: date | None = None) -> str:
+# Rain over the last three days that says the rains have actually arrived.
+RAINS_ARRIVED_MM = 10.0
+
+
+def current_season(today: date | None = None, rain_3d: float | None = None) -> str:
+    """Which season it is, by the calendar and by what has actually fallen.
+
+    November and April are the turning months and the onset shifts from year
+    to year, so calling them by the calendar alone is wrong as often as it is
+    right. On 6 November 2026 the page read "Rainy season" while it was 31 C
+    with 0.8 mm falling. In those two months the recent rainfall decides: if
+    little has fallen, November is still the hot dry season and April has
+    already turned cool and dry. December to March and May to August are
+    settled enough to go by the month.
+    """
     month = (today or date.today()).month
-    if month in (11, 12, 1, 2, 3, 4):
+    wet = rain_3d is not None and rain_3d >= RAINS_ARRIVED_MM
+
+    if month in (12, 1, 2, 3):
         return "rainy"
+    if month == 11:
+        return "rainy" if wet else "hot_dry"
+    if month == 4:
+        return "rainy" if wet else "cool_dry"
     if month in (5, 6, 7, 8):
         return "cool_dry"
     return "hot_dry"
