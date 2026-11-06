@@ -88,6 +88,8 @@ def train(db: Session) -> dict:
 
     cutoff = days.max() - timedelta(days=365)
     train_mask, test_mask = days <= cutoff, days > cutoff
+    # Climatology baseline probability, from the training years only.
+    train_rainy_rate = float(y[train_mask].mean())
     model = _model().fit(X[train_mask], y[train_mask])
     prob = model.predict_proba(X[test_mask])[:, 1]
     pred = (prob >= 0.5).astype(int)
@@ -101,6 +103,25 @@ def train(db: Session) -> dict:
         "brier": round(brier_score_loss(truth, prob), 3),
         "baseline_same_as_today": round(accuracy_score(truth, persistence[test_mask]), 3),
         "rainy_day_share": round(float(truth.mean()), 3),
+
+        # Both baselines below are scored with brier_score_loss on exactly the
+        # same test rows as the model, so the three Brier figures are
+        # comparable. Persistence forecasts a hard 0 or 1, for which the Brier
+        # score equals its error rate; it is still computed directly rather
+        # than inferred from the accuracy above. The climatology forecast is
+        # the rainy-day rate of the TRAINING years only, so that the baseline
+        # never sees the held-out year it is being judged on.
+        "brier_persistence": round(
+            brier_score_loss(truth, persistence[test_mask].astype(float)), 3),
+        "brier_climatology": round(
+            brier_score_loss(truth, np.full(truth.shape, train_rainy_rate)), 3),
+        "climatology_probability": round(float(train_rainy_rate), 3),
+        "brier_skill_vs_climatology": round(
+            1 - brier_score_loss(truth, prob)
+            / brier_score_loss(truth, np.full(truth.shape, train_rainy_rate)), 3),
+        "brier_skill_vs_persistence": round(
+            1 - brier_score_loss(truth, prob)
+            / brier_score_loss(truth, persistence[test_mask].astype(float)), 3),
         "test_period": f"{(cutoff + timedelta(days=1)).isoformat()} to {days.max().isoformat()}",
         "areas": len(LOCATIONS),
         "inputs": len(FEATURES),
