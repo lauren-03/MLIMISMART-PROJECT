@@ -32,7 +32,7 @@ const CONTENT = {
     reachTitle: 'Three ways to use MlimiSmart',
     reach: [
       ['On the website', 'Register with your phone number to see your dashboard, ask questions and keep your records.'],
-      ['By USSD on any phone', 'Dial *384*211# and choose from the menu. No internet and no smartphone are needed.'],
+      ['By USSD on any phone', 'Dial *384*36247# and choose from the menu. No internet and no smartphone are needed.'],
       ['By SMS', 'Send a word such as FERTILIZER or WEATHER, or ask a question in your own words. Send HELP to see everything you can ask.'],
     ],
     reachNote: 'All three give the same advice, because they all use the same system.',
@@ -67,7 +67,7 @@ const CONTENT = {
     reachTitle: 'Njira zitatu zogwiritsira ntchito MlimiSmart',
     reach: [
       ['Pa webusaiti', 'Lembetsani ndi nambala yanu ya foni kuti muone chiwonetsero chanu, mufunse mafunso ndi kusunga zolemba zanu.'],
-      ['Pa USSD pa foni iliyonse', 'Imbani *384*211# ndipo sankhani pa menyu. Simufuna intaneti kapena foni yamakono.'],
+      ['Pa USSD pa foni iliyonse', 'Imbani *384*36247# ndipo sankhani pa menyu. Simufuna intaneti kapena foni yamakono.'],
       ['Pa SMS', 'Tumizani mawu monga FETEREZA kapena NYENGO, kapena funsani funso m\'mawu anu. Tumizani THANDIZO kuti muone zonse zomwe mungafunse.'],
     ],
     reachNote: 'Njira zonse zitatu zimapereka uphungu womwewo, chifukwa zonse zimagwiritsa ntchito makina amodzi.',

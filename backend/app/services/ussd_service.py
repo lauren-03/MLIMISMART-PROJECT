@@ -19,7 +19,7 @@ SCREEN_LIMIT = 182
 BODY_LIMIT = 130
 
 # The service code a farmer dials. This is assigned by the gateway or the
-# mobile operator; *384*211# is the shape Africa's Talking issues on its
+# mobile operator; *384*36247# is the shape Africa's Talking issues on its
 # sandbox. The short code in the proposal (*211#) would be the production
 # equivalent applied for through Airtel or TNM.
 SERVICE_CODE = "*384*36247#"

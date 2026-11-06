@@ -81,7 +81,7 @@ export default function Home() {
               <div className="hero-channels">
                 <span>Website</span>
                 <span>SMS</span>
-                <span>USSD *384*211#</span>
+                <span>USSD *384*36247#</span>
                 <span>English · Chichewa</span>
               </div>
             </div>
@@ -287,7 +287,7 @@ export default function Home() {
               <div className="ussd-phone">
                 <div className="ussd-screen">
                   <pre className="ussd-text">{USSD_PREVIEW}</pre>
-                  <div className="ussd-status">*384*211# · Airtel / TNM</div>
+                  <div className="ussd-status">*384*36247# · Airtel / TNM</div>
                 </div>
               </div>
             </div>

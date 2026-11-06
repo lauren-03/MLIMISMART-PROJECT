@@ -41,7 +41,7 @@ export default function UssdPage() {
             <div className="card card-mlimi mb-3">
               <div className="card-body">
                 <div className="small text-muted">{t('ussdDial')}</div>
-                <div className="sms-number">{status?.service_code || '*384*211#'}</div>
+                <div className="sms-number">{status?.service_code || '*384*36247#'}</div>
                 {live ? (
                   <p className="small mb-0">
                     <span className="badge bg-success me-1">{t('live')}</span>
