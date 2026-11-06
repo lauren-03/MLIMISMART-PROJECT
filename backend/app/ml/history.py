@@ -13,7 +13,10 @@ from ..models import WeatherHistory
 log = logging.getLogger(__name__)
 
 ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
-FIRST_DAY = date(2016, 1, 1)
+# Earliest day fetched for an area that has no stored history at all.
+# The record was extended back to 2010 by backfill_history.py; a newly
+# added area is downloaded from the same date so all areas match.
+FIRST_DAY = date(2010, 1, 1)
 FIELDS = {
     "precipitation_sum": "rain_mm",
     "temperature_2m_max": "tmax",
@@ -103,3 +106,73 @@ def recent(db: Session, location: str, days: int = 7) -> list[WeatherHistory]:
     rows = db.scalars(select(WeatherHistory).where(WeatherHistory.location == location)
                       .order_by(WeatherHistory.day.desc()).limit(days)).all()
     return list(reversed(rows))
+
+
+async def _fetch_range(start: date, end: date) -> dict[str, dict[date, dict]]:
+    """Archive rows for every area between two dates, keyed by area and day."""
+    names = list(LOCATIONS)
+    params = {
+        "latitude": ",".join(str(LOCATIONS[n]["lat"]) for n in names),
+        "longitude": ",".join(str(LOCATIONS[n]["lon"]) for n in names),
+        "start_date": start.isoformat(),
+        "end_date": end.isoformat(),
+        "daily": ",".join(FIELDS),
+        "timezone": "Africa/Blantyre",
+    }
+    async with httpx.AsyncClient(timeout=300.0) as client:
+        response = await client.get(ARCHIVE_URL, params=params)
+        response.raise_for_status()
+        payload = response.json()
+    results = payload if isinstance(payload, list) else [payload]
+
+    out: dict[str, dict[date, dict]] = {}
+    for name, result in zip(names, results):
+        daily = result.get("daily") or {}
+        days: dict[date, dict] = {}
+        for i, day_text in enumerate(daily.get("time", [])):
+            values = {column: (daily.get(field) or [None] * (i + 1))[i]
+                      for field, column in FIELDS.items()}
+            if values["rain_mm"] is None:
+                continue
+            days[date.fromisoformat(day_text)] = values
+        out[name] = days
+    return out
+
+
+async def backfill(db: Session, start: date, end: date, *, year_chunk: bool = True) -> int:
+    """Add older days that are missing, without touching what is already stored.
+
+    Unlike update(), this takes an explicit range and never deletes. Days
+    already in the database are skipped, so running it twice is harmless.
+    Used for the one-off extension of the record back to 2010.
+    """
+    existing: dict[str, set[date]] = defaultdict(set)
+    for name, day in db.execute(
+            select(WeatherHistory.location, WeatherHistory.day)
+            .where(WeatherHistory.day >= start, WeatherHistory.day <= end)).all():
+        existing[name].add(day)
+
+    added = 0
+    spans = []
+    if year_chunk:
+        year = start.year
+        while year <= end.year:
+            spans.append((max(start, date(year, 1, 1)), min(end, date(year, 12, 31))))
+            year += 1
+    else:
+        spans.append((start, end))
+
+    for span_start, span_end in spans:
+        fetched = await _fetch_range(span_start, span_end)
+        rows = [{"location": name, "day": day, **values}
+                for name, days in fetched.items()
+                for day, values in sorted(days.items())
+                if day not in existing[name]]
+        if rows:
+            db.execute(insert(WeatherHistory), rows)
+            db.commit()
+            for r in rows:
+                existing[r["location"]].add(r["day"])
+            added += len(rows)
+        log.info("Backfill %s to %s: %d rows stored", span_start, span_end, len(rows))
+    return added

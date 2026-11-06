@@ -154,6 +154,7 @@ def leave_one_season_out(rows: list[dict]) -> dict:
 
     seasons = sorted({r["season"] for r in rows})
     truth_all, pred_all, base_all, persist_all = [], [], [], []
+    clim_expected = []   # expected accuracy of guessing at the training rates
 
     for held in seasons:
         train = [r for r in rows if r["season"] != held]
@@ -180,6 +181,14 @@ def leave_one_season_out(rows: list[dict]) -> dict:
                 prev[r["area"]] = label_of(r["rain_total"], low, high)
         persist_all.extend([prev.get(r["area"], "normal") for r in test])
 
+        # baseline 3: climatology. Guessing each class at the rate it had in
+        # the training seasons. Its expected accuracy is the sum of p_i * q_i,
+        # the training rate times the rate in the held-out season, which is
+        # scored exactly rather than by drawing random guesses.
+        for cls in CLASSES:
+            p_train = y_train.count(cls) / len(y_train)
+            clim_expected.append(p_train * y_test.count(cls))
+
         truth_all.extend(y_test)
         pred_all.extend(list(pred))
 
@@ -200,6 +209,12 @@ def leave_one_season_out(rows: list[dict]) -> dict:
         "model": scores(pred_all),
         "baseline_always_normal": scores(base_all),
         "baseline_previous_season": scores(persist_all),
+        "baseline_climatology": {
+            "expected_accuracy": round(sum(clim_expected) / len(truth_all), 3),
+            "note": ("Guessing the three classes at their training-season "
+                     "rates. Scored as an expected value, not by drawing "
+                     "random guesses, so it does not move between runs."),
+        },
         "per_class": classification_report(truth_all, pred_all, labels=CLASSES,
                                            zero_division=0, output_dict=True),
         "confusion_matrix": {
