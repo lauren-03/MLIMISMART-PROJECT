@@ -12,7 +12,12 @@ log = logging.getLogger(__name__)
 
 # Below this probability the classifier is treated as undecided, and the
 # engine asks the farmer to rephrase rather than guessing a topic.
-CONFIDENCE_FLOOR = 0.18
+# Below this the guess is too weak to commit to a topic. At 0.18 the
+# question "what time is rain expected to start" was answered with
+# pruning advice on a 0.28 score. Weak guesses now go to "general",
+# where the question is answered openly instead of being forced into
+# the nearest topic.
+CONFIDENCE_FLOOR = 0.35
 
 
 class TopicClassifier:

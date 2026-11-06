@@ -67,6 +67,8 @@ async def answer(
             raw_text,
             language,
             weather_summary=summary if not weather["offline"] else "",
+            weather_detail=("" if weather["offline"]
+                            else _weather_detail(weather, situation, rain)),
             question=question,
             max_sentences=max_sentences,
         )
@@ -159,3 +161,27 @@ def _knowledge_text(db: Session) -> str:
         .order_by(KnowledgeItem.topic)
     ).all()
     return "\n\n".join(f"{item.title_en}: {item.body_en}" for item in items)
+
+
+def _weather_detail(weather: dict, situation: dict, rain: dict | None) -> str:
+    """The actual figures, so Gemini can answer questions about the weather
+    instead of only rewording a farm recommendation."""
+    cur = weather.get("current") or {}
+    lines = [
+        f"Area: {weather.get('location')}",
+        f"Now: {cur.get('condition_en')}, {cur.get('temperature')}C, "
+        f"humidity {cur.get('humidity')}%, wind {cur.get('wind_kph')} km/h",
+        f"Rain today so far: {situation.get('rain_today')} mm; "
+        f"expected tomorrow: {situation.get('rain_tomorrow')} mm; "
+        f"last 3 days: {situation.get('rain_3d')} mm",
+    ]
+    if rain:
+        lines.append(
+            f"MlimiSmart rain model: {rain['probability']:.0%} chance of rain "
+            f"on {rain['target_day']}")
+    for day in (weather.get("forecast") or [])[:5]:
+        lines.append(
+            f"{day.get('weekday')} {day.get('date')}: {day.get('condition_en')}, "
+            f"{day.get('temp_min')}-{day.get('temp_max')}C, "
+            f"rain {day.get('rain_mm')} mm")
+    return chr(10).join(lines)

@@ -117,6 +117,10 @@ def generate(topic: str, situation: dict, decision: dict | None, rain: dict | No
     advice.points_en.append(text_en)
     advice.points_ny.append(text_ny)
     advice.situational_count = 1
-    advice.points_en.append(knowledge_for(topic, "EN"))
-    advice.points_ny.append(knowledge_for(topic, "NY"))
+    # The chosen action already says what to do today and why. The topic's
+    # background paragraph used to be appended here, which made every answer
+    # for a topic look the same and often contradicted the decision: a card
+    # reading "do not apply fertilizer now" went on to explain when to apply
+    # it, repeating "moist but not waterlogged" twice. Background belongs on
+    # the calendar and knowledge pages, not on a card answering one question.
     return advice

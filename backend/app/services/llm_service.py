@@ -18,14 +18,15 @@ _last = {"ok": None, "error": None, "model": None}
 PHRASE_PROMPT = """You are MlimiSmart, an agricultural advisory service for \
 smallholder tea farmers in Thyolo and Mulanje, Malawi.
 
-You will be given a recommendation that has already been decided by an \
-agronomic rule engine. Your only task is to express that same recommendation \
-back to the farmer clearly.
+Answer the farmer's question directly, in your own words.
+
+You are given today's weather for the farmer's area and a recommendation an agronomic rule engine has already decided. Use both to answer what was actually asked.
 
 Rules you must follow:
-- Do not change, soften or add to the recommendation. If it says to delay \
-fertilizer, your reply must say to delay fertilizer.
-- Do not invent numbers. Use only the figures given to you.
+- Answer the question that was asked. If the farmer asks when rain will start, answer from the weather figures; do not answer a different question.
+- The recommendation is the farm action you must not contradict. If it says to delay fertilizer, never tell the farmer to apply it. If the question is not about that action, you may leave it out.
+- Use only the figures given to you. Never invent a temperature, a rainfall amount or a date.
+- If the figures do not answer the question, say plainly what is known and what is not.
 - Write in {language_name}, in plain words a farmer with basic schooling reads \
 easily. Short sentences.
 - Speak directly to the farmer, respectfully. No greeting, no sign-off, no \
@@ -67,7 +68,8 @@ def _language_name(language: str) -> str:
 
 
 async def _generate(system: str, parts: list[dict], *, temperature: float = 0.3,
-                    max_tokens: int = 1024, schema: dict | None = None) -> str | None:
+                    max_tokens: int = 1024, schema: dict | None = None,
+                    search: bool = False) -> str | None:
     """One Gemini call. Returns the text, or None on any failure.
 
     If the configured model has been retired (HTTP 404), the fallback model
@@ -87,6 +89,11 @@ async def _generate(system: str, parts: list[dict], *, temperature: float = 0.3,
         "contents": [{"role": "user", "parts": parts}],
         "generationConfig": config,
     }
+    if search:
+        # Google Search grounding, for questions the knowledge base does not
+        # cover. Not used for the core agronomy, where the rule engine and the
+        # knowledge base stay the authority.
+        body["tools"] = [{"google_search": {}}]
 
     models = [settings.gemini_model]
     if settings.gemini_fallback_model and settings.gemini_fallback_model not in models:
@@ -150,7 +157,8 @@ def _record(ok: bool, error: str | None, model: str) -> None:
 # 1. Phrasing a decided recommendation
 # ---------------------------------------------------------------------------
 async def phrase(advice_text: str, language: str, *, weather_summary: str = "",
-                 question: str = "", max_sentences: int = 4) -> tuple[str, str]:
+                 question: str = "", max_sentences: int = 4,
+                 weather_detail: str = "") -> tuple[str, str]:
     """Return (text, source) where source is "gemini" or "template".
 
     On any failure the rule engine's own wording is returned unchanged, so the
@@ -159,9 +167,13 @@ async def phrase(advice_text: str, language: str, *, weather_summary: str = "",
     lines = []
     if question:
         lines.append(f"The farmer asked: {question}")
-    if weather_summary:
+    if weather_detail:
+        lines.append("Weather for the farmer's area:")
+        lines.append(weather_detail)
+    elif weather_summary:
         lines.append(f"Current weather where the farmer is: {weather_summary}")
-    lines.append("The recommendation to express:")
+    lines.append("The farm action the rule engine decided "
+                 "(do not contradict it):")
     lines.append(advice_text)
 
     text = await _generate(
@@ -187,7 +199,11 @@ async def answer_open(question: str, language: str, *, location: str,
         language_name=_language_name(language), max_sentences=max_sentences,
         knowledge=knowledge[:8000],
     )
-    return await _generate(system, [{"text": question}], temperature=0.4)
+    # Search is allowed here because these are the questions the
+    # knowledge base does not answer. The eight farm topics never
+    # reach this path, so the rules stay the agronomic authority.
+    return await _generate(system, [{"text": question}],
+                           temperature=0.4, search=True)
 
 
 
