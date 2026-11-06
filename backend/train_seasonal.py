@@ -94,12 +94,24 @@ def build_rows(db) -> list[dict]:
                     pre_tmax[(name, p)].append(r.tmax)
 
     # A season needs nearly all its days present before it can be labelled.
+    # Everything rejected is recorded in `excluded`, so no season is dropped
+    # quietly: the report lists each one with the reason.
     expected = 181
     out = []
+    excluded: list[dict] = []
     for (name, s), days in sorted(season_days.items()):
         if days < expected * 0.95:
+            excluded.append({"area": name, "season": s, "season_days": days,
+                             "days_needed": int(expected * 0.95),
+                             "reason": "the season is not fully covered by the "
+                                       "weather record"})
             continue
         if pre_days.get((name, s), 0) < 100:
+            excluded.append({"area": name, "season": s,
+                             "pre_season_days": pre_days.get((name, s), 0),
+                             "days_needed": 100,
+                             "reason": "the July-October run-up is not fully "
+                                       "covered, so the predictors cannot be built"})
             continue
         place = LOCATIONS[name]
         tmaxes = pre_tmax.get((name, s), [])
@@ -116,6 +128,7 @@ def build_rows(db) -> list[dict]:
             "lat": float(place["lat"]),
             "lon": float(place["lon"]),
         })
+    build_rows.excluded = excluded   # read by the report
     return out
 
 
@@ -310,10 +323,42 @@ def main() -> int:
             "predictors": FEATURES,
             "predictors_known_by": "31 October of the season being predicted",
             "data": independence_note(rows),
+            "season_definition": {
+                "target": "1 November of season Y to 30 April of year Y+1",
+                "predictor_window": "1 July to 31 October of year Y",
+                "why_one_fewer_season_than_years": (
+                    "A season straddles the turn of the year, so N calendar "
+                    "years of weather contain at most N-1 complete seasons. "
+                    "A record running 1 Jan 2010 to 31 Dec 2025 cannot "
+                    "complete season 2009 (it is missing Nov-Dec 2009) and "
+                    "cannot complete season 2025 (it is missing Jan-Apr "
+                    "2026), which leaves seasons 2010 to 2024: fifteen. "
+                    "Sixteen complete seasons would need the record to run "
+                    "to 30 April 2026."),
+            },
             "observation_period": {
                 "first_season": min(r["season"] for r in rows),
                 "last_season": max(r["season"] for r in rows),
+                "complete_seasons": len({r["season"] for r in rows}),
+                "excluded_area_seasons": getattr(build_rows, "excluded", [])[:40],
+                "excluded_area_seasons_total": len(getattr(build_rows, "excluded", [])),
             },
+            "limitations": [
+                "Fifteen seasons is a small record for seasonal forecasting, "
+                "and the areas are not independent of one another, so the "
+                "effective sample size under 'data' is far smaller than the "
+                "row count. Any skill reported here is provisional.",
+                "Each fold is scored on a single season, so a fold's accuracy "
+                "moves in steps of about 1/23 and the fold-to-fold spread is "
+                "wide.",
+                "The predictors are local: the dry season that preceded the "
+                "rains, the previous season's total and the position of the "
+                "area. No sea-surface temperature or ENSO index is used, and "
+                "those are what operational seasonal forecasts rely on most.",
+                "The three classes are defined by terciles of this record "
+                "alone, so they describe rainfall relative to 2010-2024 in "
+                "these areas, not any national or official classification.",
+            ],
             "evaluation": leave_one_season_out(rows),
         }
 
@@ -331,12 +376,28 @@ def main() -> int:
             report["saved"] = False
         else:
             ev = report["evaluation"].get("model", {})
+            seasons = sorted({r["season"] for r in rows})
             report["version"] = store.save(
                 db, NAME, bundle,
                 train_rows=len(rows),
                 test_rows=report["evaluation"].get("observations", 0),
-                metrics=ev)
+                metrics=ev,
+                # Saved but NOT approved. A seasonal model has to be read
+                # before it is allowed to answer farmers, and until it is
+                # approved the backend carries on with what it already has.
+                approve=False,
+                dataset_version=f"history-{seasons[0]}-{seasons[-1]}-seasons",
+                training_start=date(seasons[0], SEASON_START_MONTH, 1),
+                training_end=date(seasons[-1] + 1, 4, 30),
+                features=FEATURES,
+                report=report,
+                notes="Awaiting review. Approve with approve_model.py once the "
+                      "evaluation section has been read.")
             report["saved"] = True
+            report["approved"] = False
+            report["next_step"] = (
+                f"python approve_model.py --model {NAME} "
+                f"--version {report['version']} --approve")
 
         text = json.dumps(report, indent=2, default=str)
         if args.report:

@@ -5,7 +5,8 @@ from enum import Enum as PyEnum
 from datetime import date
 
 from sqlalchemy import (
-    Boolean, Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text,
+    Boolean, Date, DateTime, Enum, Float, ForeignKey, Integer, LargeBinary,
+    String, Text,
     UniqueConstraint, func
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -320,4 +321,40 @@ class ModelRun(Base):
     train_rows: Mapped[int] = mapped_column(Integer)
     test_rows: Mapped[int] = mapped_column(Integer)
     metrics: Mapped[str] = mapped_column(Text)  # JSON
+    trained_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class ModelArtifact(Base):
+    """A trained model kept in the database, with the record of its training.
+
+    Render rebuilds its filesystem on every deployment, so a model saved only
+    as a file is lost. The bytes live here instead, beside the figures that
+    justify them, and the backend loads the newest *approved* row - never
+    simply the newest one, so a poor training run cannot take over.
+    """
+    __tablename__ = "model_artifacts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    model_name: Mapped[str] = mapped_column(String(40), index=True)
+    version: Mapped[int] = mapped_column(Integer)
+    artifact: Mapped[bytes] = mapped_column(LargeBinary)       # joblib bytes
+    artifact_sha256: Mapped[str] = mapped_column(String(64))
+    artifact_bytes: Mapped[int] = mapped_column(Integer)
+    # what the model was taught on
+    dataset_version: Mapped[str] = mapped_column(String(60))   # e.g. "history-2010-2025"
+    training_start: Mapped[date | None] = mapped_column(Date, nullable=True)
+    training_end: Mapped[date | None] = mapped_column(Date, nullable=True)
+    features: Mapped[str] = mapped_column(Text)                # JSON list
+    train_rows: Mapped[int] = mapped_column(Integer, default=0)
+    test_rows: Mapped[int] = mapped_column(Integer, default=0)
+    # how well it did, and the whole report behind the summary
+    metrics: Mapped[str] = mapped_column(Text)                 # JSON
+    report: Mapped[str | None] = mapped_column(Text, nullable=True)   # JSON
+    library_versions: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # whether it is allowed to serve farmers
+    approved: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    approved_by: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     trained_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

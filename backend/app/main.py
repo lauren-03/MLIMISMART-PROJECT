@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI):
     """Create the tables, train the topic classifier, start the learning cycle."""
     init_db()
     log.info("Database ready: %s", active_database_url.split("@")[-1])
+    _restore_models()
     classifier.train()
     cycle = asyncio.create_task(learning.run_forever())
     gateways = asyncio.create_task(_connect_gateways())
@@ -38,6 +39,27 @@ async def lifespan(app: FastAPI):
     cycle.cancel()
     gateways.cancel()
     await tunnel.stop()
+
+
+def _restore_models() -> None:
+    """Bring the approved models back after a deployment.
+
+    Render starts each deployment with an empty ml_store/ directory. The
+    approved model bytes are kept in the database, so they are written back
+    to disk here, before the first farmer request arrives. A failure is
+    logged and not raised: the site must still serve rules-based advice.
+    """
+    from .database import SessionLocal
+    from .ml import store
+
+    db = SessionLocal()
+    try:
+        restored = store.restore_all(db)
+        log.info("Models restored from the database: %s", restored or "none needed")
+    except Exception:  # noqa: BLE001 - never block startup on this
+        log.exception("Could not restore models from the database")
+    finally:
+        db.close()
 
 
 async def _connect_gateways() -> None:
